@@ -2,6 +2,9 @@
 import requests
 import json
 import libmediathek4utils as lm4utils
+import pyjwt as jwt
+import xbmc
+import time
 
 base = 'https://api.vod.filmwerte.de/api/v1/'
 
@@ -69,6 +72,7 @@ def parseMain():
 	j = requests.get(f'{base}tenant-groups/21960588-0518-4dd3-89e5-f25ba5bf5631/navigation').json()
 
 def parseWatchList(params,content='videos'):
+	_checkTokenExpired()
 	headers = {
 		'Authorization':f'Bearer {lm4utils.getSetting("access_token")}'
 	}
@@ -159,6 +163,7 @@ def parseResponse(responseJson,content='videos'):
 	return res
 
 def getVideoUrl(videoId):
+	_checkTokenExpired()
 	headers = {
 		'Authorization':f'Bearer {lm4utils.getSetting("access_token")}'
 	}
@@ -169,9 +174,25 @@ def getVideoUrl(videoId):
 	licenseserverurl = f'{videoInfo["widevineLicenseServerUri"]}|{wvheaders}|R{{SSM}}|'
 	return {'media':[{'url':url, 'licenseserverurl':licenseserverurl, 'type': 'video', 'stream':'DASH'}]}
 
+def _checkTokenExpired():
+	tokenString = lm4utils.getSetting("access_token")
+	isExpired = False
+	try:
+		token = jwt.decode(tokenString, key="", algorithms=["RSA256"], options={"verify_signature":False, "verify_aud":False})
+		expiry = token['exp']
+		if expiry <= time.time():
+			isExpired = True
+	except jwt.exceptions.ExpiredSignatureError:
+		isExpired = True
+	
+	if isExpired:
+		xbmc.log("Access token for filmfried.de expired. Will fetch new token.",xbmc.LOGINFO)
+		_getNewToken()
+
 def _getNewToken():
 	refresh_token = lm4utils.getSetting('refresh_token')
 	if refresh_token == '':
+		xbmc.log("Cannot fetch new access token for filmfried.de. Refresh token is missing.",xbmc.LOGERROR)
 		return False
 	files = {'client_id':(None, f'tenant-{lm4utils.getSetting("tenant")}-filmwerte-vod-frontend'),'grant_type':(None, 'refresh_token'),'refresh_token':(None, refresh_token),'scope':(None, 'filmwerte-vod-api offline_access')}
 	j = requests.post('https://api.vod.filmwerte.de/connect/token', files=files).json()
