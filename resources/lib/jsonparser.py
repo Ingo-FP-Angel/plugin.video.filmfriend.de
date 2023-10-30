@@ -136,29 +136,15 @@ def parseSearch(params,content='videos'):
 			res['items'].append(d)
 	return res
 
-def getVideoUrl(video):
+def getVideoUrl(videoId):
 	headers = {
 		'Authorization':f'Bearer {lm4utils.getSetting("access_token")}'
 	}
 
-	r = requests.get(f'{base}customers(end-user)/me',headers=headers).text
-	if r == '':
-		token = _getNewToken()
-		if not token:
-			lm4utils.displayMsg(lm4utils.getTranslation(30507),lm4utils.getTranslation(30508))
-			return {}
-		headers = {
-			'Authorization':f'Bearer {token}'
-		}
-		r = requests.get(f'{base}customers(end-user)/me',headers=headers).text
-
-	j = json.loads(r)
-	id = j['id']
-
-	j = requests.get(f'{base}customers(tenant)/{lm4utils.getSetting("tenant")}/customers(end-user)/{id}/videos/{video}/uri?pin=undefined',headers=headers).json()
-	url = f'{j["mpegDashUri"]}'
+	videoInfo = requests.get(f'https://api.tenant.frontend.vod.filmwerte.de/v11/{lm4utils.getSetting("tenant")}/movies/{videoId}/uri',headers=headers).json()
+	url = f'{videoInfo["mpegDash"]}'
 	wvheaders = '&content-type='
-	licenseserverurl = f'{j["widevineLicenseServerUri"]}|{wvheaders}|R{{SSM}}|'
+	licenseserverurl = f'{videoInfo["widevineLicenseServerUri"]}|{wvheaders}|R{{SSM}}|'
 	return {'media':[{'url':url, 'licenseserverurl':licenseserverurl, 'type': 'video', 'stream':'DASH'}]}
 
 def _getNewToken():
