@@ -1,0 +1,3 @@
+v1.0.1
+- [fix]  Make the plugin work again
+- [feat] Add watchlist support

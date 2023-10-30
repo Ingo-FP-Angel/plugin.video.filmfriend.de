@@ -58,14 +58,36 @@ if s in ['system','']:
 else:
 	lang = languages[s]
 
+def fetchJson(url,headers=None):
+	response = requests.get(url,headers=headers)
+	if response.status_code > 299:
+		raise RuntimeError(f"Fetching '{url}' failed with code '{response.status_code}' and optional message '{response.text}'")
+
+	return response.json()
+
 def parseMain():
 	j = requests.get(f'{base}tenant-groups/21960588-0518-4dd3-89e5-f25ba5bf5631/navigation').json()
 
+def parseWatchList(params,content='videos'):
+	headers = {
+		'Authorization':f'Bearer {lm4utils.getSetting("access_token")}'
+	}
+
+	j = fetchJson(f'https://api.tenant.frontend.vod.filmwerte.de/v11/{lm4utils.getSetting("tenant")}/watchlist{params}',headers)
+	return parseResponse(j,content)
+
 def parseSearch(params,content='videos'):
-	j = requests.get(f'{base}/tenant-groups/fba2f8b5-6a3a-4da3-b555-21613a88d3ef/search{params}').json()
+	j = fetchJson(f'{base}/tenant-groups/fba2f8b5-6a3a-4da3-b555-21613a88d3ef/search{params}')
+	return parseResponse(j,content)
+
+def parseResponse(responseJson,content='videos'):
 	res = {'items':[],'content':content,'pagination':{'currentPage':0}}
-	for item in j['results']:
-		result = item['result']
+	for item in responseJson['results']:
+		result = item
+		if 'result' in item:
+			result = item['result']
+		else:
+			result = item[item['kind'].lower()]
 		if item['kind'] == 'Series':
 			d = {'type':'tvshow', 'params':{'mode':'listSearch', 'content':'tvshows'}, 'metadata':{'art':{}}}
 			d['metadata']['name'] = _getString(result,'title')
@@ -96,7 +118,7 @@ def parseSearch(params,content='videos'):
 			res['items'].append(d)
 
 
-		elif item['kind'] == 'Video':
+		elif item['kind'] == 'Video' or item['kind'] == 'Movie':
 			d = {'type':'movie', 'params':{'mode':'playVideo'}, 'metadata':{'art':{},'actors':[],'directors':[],'artists':[],'writers':[],'genres':[],'credits':[]}}
 			d['metadata']['name'] = _getString(result,'title')
 			if 'originalTitle' in result:
@@ -116,18 +138,18 @@ def parseSearch(params,content='videos'):
 				d['metadata']['aired'] = result['releaseDate'][:10]
 			d['metadata']['art'] = _getArt(result)
 
-
-			for participant in result['participations']:
-				if participant['kind'] in ['Actor', 'Voice']:
-					d['metadata']['actors'].append({'role':participant.get('englishDescription',''),'name':_getName(participant)})
-				elif participant['kind'] in ['Director', 'Producer']:
-					d['metadata']['directors'].append(_getName(participant))
-				elif participant['kind'] == 'Composer':
-					d['metadata']['artists'].append(_getName(participant))
-				elif participant['kind'] in ['Writer', 'Editor']:
-					d['metadata']['writers'].append(_getName(participant))
-				elif participant['kind'] in ['Misc', 'Camera']:
-					d['metadata']['credits'].append(_getName(participant))
+			if 'participations' in result:
+				for participant in result['participations']:
+					if participant['kind'] in ['Actor', 'Voice']:
+						d['metadata']['actors'].append({'role':participant.get('englishDescription',''),'name':_getName(participant)})
+					elif participant['kind'] in ['Director', 'Producer']:
+						d['metadata']['directors'].append(_getName(participant))
+					elif participant['kind'] == 'Composer':
+						d['metadata']['artists'].append(_getName(participant))
+					elif participant['kind'] in ['Writer', 'Editor']:
+						d['metadata']['writers'].append(_getName(participant))
+					elif participant['kind'] in ['Misc', 'Camera']:
+						d['metadata']['credits'].append(_getName(participant))
 			if 'genres' in result:
 				for genre in result['genres']:
 					d['metadata']['genres'].append(_getString(genre,'name'))
@@ -165,7 +187,10 @@ def _getString(d,k):
 		else:
 			return d[english[k]]
 	except:
-		return ''
+		try:
+			return d.get(k)
+		except:
+			return ''
 
 def _getName(participant):
 	if 'firstName' in participant['person']:
@@ -178,15 +203,28 @@ def _getArt(item):
 	fanart = ''
 	poster = ''
 	banner = ''
-	for art in item['artworks']:
-		if art['kind'] == 'Thumbnail' and thumb == '':
-			thumb = art['uri']['thumbnail2x']
-		elif art['kind'] == 'Thumbnail' and fanart == '':
-			fanart = art['uri']['resolution4x']
-		elif art['kind'] == 'Background':
-			fanart = art['uri']['resolution1080']
-		elif art['kind'] == 'CoverPortrait' and poster == '':
-			poster = art['uri']['thumbnail4x']
-		elif art['kind'] == 'Teaser' and banner == '':
-			banner = art['uri']['resolution720']
+	if 'artworkUris' in item:
+		for art in item['artworkUris']:
+			if art['kind'] == 'Thumbnail' and thumb == '':
+				thumb = art['resolution2x']
+			elif art['kind'] == 'Thumbnail' and fanart == '':
+				fanart = art['resolution4x']
+			elif art['kind'] == 'Background':
+				fanart = art['resolution1080']
+			elif art['kind'] == 'CoverPortrait' and poster == '':
+				poster = art['resolution4x']
+			elif art['kind'] == 'Teaser' and banner == '':
+				banner = art['resolution720']
+	else:
+		for art in item['artworks']:
+			if art['kind'] == 'Thumbnail' and thumb == '':
+				thumb = art['uri']['thumbnail2x']
+			elif art['kind'] == 'Thumbnail' and fanart == '':
+				fanart = art['uri']['resolution4x']
+			elif art['kind'] == 'Background':
+				fanart = art['uri']['resolution1080']
+			elif art['kind'] == 'CoverPortrait' and poster == '':
+				poster = art['uri']['thumbnail4x']
+			elif art['kind'] == 'Teaser' and banner == '':
+				banner = art['uri']['resolution720']
 	return {'thumb':thumb, 'fanart':fanart, 'poster':poster, 'banner':banner}
