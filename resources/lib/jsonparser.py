@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 import requests
-import json
 import libmediathek4utils as lm4utils
 import pyjwt as jwt
-import xbmc
 import time
 
 base = 'https://api.vod.filmwerte.de/api/v1/'
@@ -186,13 +184,13 @@ def _checkTokenExpired():
 		isExpired = True
 	
 	if isExpired:
-		xbmc.log("Access token for filmfried.de expired. Will fetch new token.",xbmc.LOGINFO)
+		lm4utils.log("Access token for filmfried.de expired. Will fetch new token.")
 		_getNewToken()
 
 def _getNewToken():
 	refresh_token = lm4utils.getSetting('refresh_token')
 	if refresh_token == '':
-		xbmc.log("Cannot fetch new access token for filmfried.de. Refresh token is missing.",xbmc.LOGERROR)
+		lm4utils.log("Cannot fetch new access token for filmfried.de. Refresh token is missing.")
 		return False
 	files = {'client_id':(None, f'tenant-{lm4utils.getSetting("tenant")}-filmwerte-vod-frontend'),'grant_type':(None, 'refresh_token'),'refresh_token':(None, refresh_token),'scope':(None, 'filmwerte-vod-api offline_access')}
 	j = requests.post('https://api.vod.filmwerte.de/connect/token', files=files).json()
