@@ -1,3 +1,7 @@
+v1.0.2
+- [refactor] Temporarily make this add-on independent of script.module.libmediathek4 which has no working version
+             so that playback of filmfriend.de content works out-of-the-box
+
 v1.0.1
 - [fix]  Make the plugin work again
 - [fix]  Refresh access_token before usage if expired
