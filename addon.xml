@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<addon id="plugin.video.filmfriend" name="Filmfriend.de" version="1.0.1" provider-name="Ingo-FP-Angel, sarbes">
+<addon id="plugin.video.filmfriend" name="Filmfriend.de" version="1.0.2" provider-name="Ingo-FP-Angel, sarbes">
     <requires>
 		<import addon="xbmc.python" version="3.0.0"/>
-		<import addon="script.module.libmediathek4" version="1.0.0"/>
 		<import addon="script.module.pyjwt" version="1.7.1"/>
 		<import addon="script.module.requests" version="2.19.1"/>
 		<import addon="inputstream.adaptive" version="2.5.4"/>

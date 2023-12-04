@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 import requests
 import xbmcgui
-import xbmcaddon
-import json
-import libmediathek4utils as lm4utils
+import resources.lib.external.libmediathek4utils as lm4utils
 
 base = 'https://api.tenant-group.frontend.vod.filmwerte.de/v7/'
 providerBase = 'https://api.tenant.frontend.vod.filmwerte.de/v11/'

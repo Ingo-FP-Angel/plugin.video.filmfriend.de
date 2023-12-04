@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
-from libmediathek4 import lm4
 import resources.lib.jsonparser as jsonParser
-
-
+from resources.lib.external.libmediathek4 import lm4
 
 class filmfriend(lm4):
 	def __init__(self):

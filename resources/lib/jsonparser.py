@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import requests
-import libmediathek4utils as lm4utils
 import pyjwt as jwt
 import time
+import resources.lib.external.libmediathek4utils as lm4utils
 
 base = 'https://api.vod.filmwerte.de/api/v1/'
 
