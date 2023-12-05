@@ -248,7 +248,6 @@ msgctxt "#32137"
 msgid "Collections"
 msgstr "Sammlungen"
 
-#most listend to
 msgctxt "#32138"
 msgid "Most played"
 msgstr "Meistgehört"
@@ -280,3 +279,7 @@ msgstr "Ausgewählte Filme"
 msgctxt "#32145"
 msgid "Channel Overview"
 msgstr "Kanalüberblick"
+
+msgctxt "#32146"
+msgid "Videos"
+msgstr "Videos"

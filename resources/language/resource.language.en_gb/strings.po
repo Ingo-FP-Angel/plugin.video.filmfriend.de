@@ -250,7 +250,7 @@ msgstr "Collections"
 
 msgctxt "#32138"
 msgid "Most played"
-msgstr "Most viewed"
+msgstr "Most played"
 
 msgctxt "#32139"
 msgid "Search"
@@ -279,3 +279,7 @@ msgstr "Selected Movies"
 msgctxt "#32145"
 msgid "Channel Overview"
 msgstr "Channel Overview"
+
+msgctxt "#32146"
+msgid "Videos"
+msgstr "Videos"

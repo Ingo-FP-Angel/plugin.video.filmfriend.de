@@ -2,6 +2,7 @@
 
 import json
 import sys
+import time
 import urllib
 import urllib.parse
 import xbmcaddon
@@ -34,11 +35,6 @@ class lm4:
 	def sortAZ(self):
 		xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_TITLE_IGNORE_THE)
 
-	def getSearchString(self):
-		return 'sport'
-
-
-
 	def setSetting(self,k,v):
 		return xbmcplugin.setSetting(int(sys.argv[1]), k, v)
 		
@@ -53,34 +49,51 @@ class lm4:
 	
 	def addEntries(self,d):
 		lists = []
-		#print(json.dumps(d))
 		for item in d['items']:
 			u = self._buildUri(item['params'])
-			#print('Pluginpath')
-			#print(self._buildUri(item['params']))
-			#print('Item')
-			#print(json.dumps(item, indent=4, sort_keys=True))
-			
-
-			"""if 'type' in items anitems d['type'] == 'date' and 'airedtime' in items:
-				items["name"] = '(' + str(items["airedtime"]) + ') ' + items["name"]
-			elif 'type' in items and items['type'] == 'date' and 'time' in items:
-				items["name"] = '(' + str(items["date"]) + ') ' + items["name"]
-			"""	
 			metadata = item['metadata']
+			name = metadata.get('name','')
+			ilabels = {}
 
-			liz=xbmcgui.ListItem(metadata.get('name',''))
+
+
+			if 'type' in item:
+				if item['type'] in ['video', 'live', 'clip']:
+					ilabels['mediatype'] = 'video'
+				elif item['type'] in ['date']:
+					ilabels['mediatype'] = 'video'
+					if 'aired' in metadata:
+						if 'ISO8601' in metadata['aired']:
+							if metadata['aired']['ISO8601'].endswith('Z'):
+								t = time.strptime(metadata['aired']['ISO8601'],'%Y-%m-%dT%H:%M:%SZ')
+							else:
+								t = time.strptime(metadata['aired']['ISO8601'],'%Y-%m-%dT%H:%M:%S%z')
+							ilabels['aired'] = time.strftime('%Y-%m-%d',t)
+							name = f'({time.strftime("%H:%M",t)}) {name}'
+
+				elif item['type'] in ['tvshow']:
+					ilabels['mediatype'] = 'tvshow'
+				elif item['type'] in ['shows', 'season']:
+					ilabels['mediatype'] = 'season'
+				elif item['type'] in ['episode']:
+					ilabels['mediatype'] = 'episode'
+				elif item['type'] in ['movie']:
+					ilabels['mediatype'] = 'movie'
+				elif item['type'] in ['sport']:
+					ilabels['mediatype'] = 'sport'
+				else:
+					ilabels['mediatype'] = 'video'
+				
 			
-			ilabels = {
-				"Title": 				metadata.get('name',''),
+			ilabels.update({
+				"Title": 				name,
 				"Plot": 				metadata.get('plot',metadata.get('plotoutline','')),
 				"Plotoutline": 	metadata.get('plotoutline',''),
 				"Duration": 		str(metadata.get('duration','')),
 				"Mpaa": 				metadata.get('mpaa',''),
-				"Aired": 				metadata.get('aired',''),
 				"Studio": 			metadata.get('channel',''),
-				#"episode": 			metadata.get('episode',None),
-				#"season": 			metadata.get('season',''),
+				"episode": 			metadata.get('episode',''),
+				"season": 			metadata.get('season',''),
 				"tvshowtitle": 	metadata.get('tvshowtitle',''),
 				"rating": 			metadata.get('rating',''),
 				"director": 		metadata.get('directors',''),
@@ -90,8 +103,11 @@ class lm4:
 				"genre": 				metadata.get('genres',''),
 				"year": 				metadata.get('year',''),
 				"premiered": 		metadata.get('premiered',''),
-				"premiered": 		metadata.get('originaltitle',''),
-				}
+				"originaltitle": 		metadata.get('originaltitle',''),
+				})
+
+			liz=xbmcgui.ListItem(name)
+
 			if 'art' in metadata:
 				liz.setArt(metadata['art'])
 			if 'episode' in metadata:
@@ -105,22 +121,6 @@ class lm4:
 
 			if 'actors' in metadata:
 				liz.setCast(metadata['actors'])
-
-			if 'type' in item:
-				if item['type'] in ['video', 'live', 'date', 'clip']:
-					ilabels['mediatype'] = 'video'
-				elif item['type'] in ['tvshow']:
-					ilabels['mediatype'] = 'tvshow'
-				elif item['type'] in ['shows', 'season']:
-					ilabels['mediatype'] = 'season'
-				elif item['type'] in ['episode']:
-					ilabels['mediatype'] = 'episode'
-				elif item['type'] in ['movie']:
-					ilabels['mediatype'] = 'movie'
-				elif item['type'] in ['sport']:
-					ilabels['mediatype'] = 'sport'
-				else:
-					ilabels['mediatype'] = 'video'
 					
 			ok=True
 
@@ -129,19 +129,6 @@ class lm4:
 			else:
 				liz.setInfo( type="Video", infoLabels=ilabels)
 				
-			"""	art = {}
-			art['thumb'] = d.get('thumb')
-			art['landscape'] = d.get('thumb')
-			art['poster'] = d.get('thumb')
-			art['fanart'] = d.get('fanart',d.get('thumb',fanart))
-			art['icon'] = d.get('channelLogo','')
-			liz.setArt(art)"""
-			
-			"""
-			if 'customprops' in d:
-				for prop in d['customprops']:
-					liz.setProperty(prop, d['customprops'][prop])
-			"""		
 			if item.get('type',None) in ['video', 'live', 'date', 'clip', 'episode', 'audio', 'sport', 'sports', 'movie', 'song']:
 				liz.setProperty('IsPlayable', 'true')
 				lists.append([u,liz,False])
@@ -152,26 +139,11 @@ class lm4:
 			xbmcplugin.setContent(handle=int(sys.argv[1]), content=d['content'] )
 		else:
 			xbmcplugin.setContent(handle=int(sys.argv[1]), content="files" )
-			"""
-			if d['type'] in ['video', 'live', 'date', 'clip', 'episode']:
-				xbmcplugin.setContent(handle=int(sys.argv[1]), content="episodes" )
-			elif d['type'] in ['shows', 'season']:
-				xbmcplugin.setContent(handle=int(sys.argv[1]), content="tvshows" )
-			elif d['type'] in ['sport']:
-				xbmcplugin.setContent(handle=int(sys.argv[1]), content="sport" )
-			elif d['type'] in ['movie']:
-				xbmcplugin.setContent(handle=int(sys.argv[1]), content="movies" )
-			elif d['type'] in ['songs']:
-				xbmcplugin.setContent(handle=int(sys.argv[1]), content="songs" )
-			else:
-				xbmcplugin.setContent(handle=int(sys.argv[1]), content="files" )
-			"""
-
 		
 		xbmcplugin.addDirectoryItems(int(sys.argv[1]), lists)
 
 	def play(self,d,external=False):
-		if len(d['media']) == 0:#TODO: add error msg
+		if not 'media' in d or len(d['media']) == 0:#TODO: add error msg
 			listitem = xbmcgui.ListItem(path='')
 			pluginhandle = int(sys.argv[1])
 			xbmcplugin.setResolvedUrl(pluginhandle, False, listitem)
@@ -185,12 +157,12 @@ class lm4:
 				if subtitle['type'] == 'srt':
 					subs.append(subtitle['url'])
 				elif subtitle['type'] == 'ttml':
-					import libmediathek3ttml2srt
-					subFile = libmediathek3ttml2srt.ttml2Srt(subtitle['url'])
+					import libmediathek4ttml2srt
+					subFile = libmediathek4ttml2srt.ttml2Srt(subtitle['url'])
 					subs.append(subFile)
 				elif subtitle['type'] == 'webvtt':
-					import libmediathek3webvtt2srt 
-					subFile = libmediathek3webvtt2srt.webvtt2Srt(subtitle['url'])
+					import libmediathek4webvtt2srt 
+					subFile = libmediathek4webvtt2srt.webvtt2Srt(subtitle['url'])
 					subs.append(subFile)
 				else:
 					log('Subtitle format not supported: ' + subtitle['type'])
@@ -244,7 +216,6 @@ class lm4:
 			if 'licenseserverurl' in item:
 				listitem.setProperty('inputstream.adaptive.license_type', 'com.widevine.alpha')
 				listitem.setProperty('inputstream.adaptive.license_key', item['licenseserverurl'])
-			#listitem.setProperty('inputstream.adaptive.stream_headers','User-Agent=Mozilla%2F5.0%20%28Windows%20NT%206.1%3B%20Win64%3B%20x64%29%20AppleWebKit%2F537.36%20%28KHTML%2C%20like%20Gecko%29%20Chrome%2F63.0.3239.84%20Safari%2F537.36')
 			listitem.setMimeType('application/dash+xml')
 			listitem.setContentLookup(False)
 		elif streamType == 'HLS':
@@ -252,9 +223,6 @@ class lm4:
 			listitem.setProperty('inputstream', 'inputstream.adaptive')
 			listitem.setProperty('inputstream.adaptive.manifest_type', 'hls')
 			listitem.setContentLookup(False)
-		#elif streamType == 'MP4':
-		#	listitem.setMimeType('application/dash+xml')
-		#	listitem.setContentLookup(False)
 
 		return listitem,url
 
@@ -265,7 +233,6 @@ class lm4:
 			self.play(self.playbackModes[mode]())
 		else:
 			l = self.modes[mode]()
-			#print(json.dumps(l))
 			self.addEntries(l)
 			self.endOfDirectory()	
 
@@ -294,13 +261,13 @@ class lm4:
 	def libMediathekListDate(self):
 		result = {'items':[]}
 		weekdayDict = { 
-			'0': self.translation(32013),#Sonntag
-			'1': self.translation(32014),#Montag
-			'2': self.translation(32015),#Dienstag
-			'3': self.translation(32016),#Mittwoch
-			'4': self.translation(32017),#Donnerstag
-			'5': self.translation(32018),#Freitag
-			'6': self.translation(32019),#Samstag
+			'0': self.translation(32013),
+			'1': self.translation(32014),
+			'2': self.translation(32015),
+			'3': self.translation(32016),
+			'4': self.translation(32017),
+			'5': self.translation(32018),
+			'6': self.translation(32019),
 			}
 		
 		i = 0
@@ -322,7 +289,7 @@ class lm4:
 			result['items'].append(d)
 			i += 1
 
-		#if self.params.get('dateChooser',False) == True:
+		#if self.params.get('datePicker',False) == True:
 		#	d = {'params':{'mode': mode}, 'metadata':{'name': self.translation(32022)}, 'type':'dir'}
 		#	if channel: d['params']['channel'] = channel
 		#	result['items'].append(d)
@@ -330,41 +297,6 @@ class lm4:
 
 	def libMediathekPlayDirect(self):
 		return {'media':[{'url':self.params['url'], 'stream':self.params['stream']}]}
-
-	def populateDirDate(self,mode,channel=False,dateChooser=False):
-		weekdayDict = { 
-			'0': self.translation(32013),#Sonntag
-			'1': self.translation(32014),#Montag
-			'2': self.translation(32015),#Dienstag
-			'3': self.translation(32016),#Mittwoch
-			'4': self.translation(32017),#Donnerstag
-			'5': self.translation(32018),#Freitag
-			'6': self.translation(32019),#Samstag
-			}
-		result = {'items':[]}
-		
-		i = 0
-		while i <= 6:
-			day = date.today() - timedelta(i)
-		
-			d = {'params':{'mode': mode, 'datum': str(i), 'yyyymmdd': self._calcyyyymmdd(i)}, 'metadata':{}, 'type':'dir'}
-			if i == 0:
-				d['metadata']['name'] = self.translation(32020)
-			elif i == 1:
-				d['metadata']['name'] = self.translation(32021)
-			else:
-				d['metadata']['name'] = weekdayDict[day.strftime("%w")]
-			if channel:
-				d['params']['channel'] = channel
-
-			result['items'].append(d)
-			i += 1
-
-		#if self.params.get('dateChooser',False) == True:
-		#	d = {'params':{'mode': mode}, 'metadata':{'name': self.translation(32022)}, 'type':'dir'}
-		#	if channel: d['params']['channel'] = channel
-		#	result['items'].append(d)
-		return result
 
 	def _calcyyyymmdd(self,d):
 		day = date.today() - timedelta(d)
