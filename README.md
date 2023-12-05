@@ -1,4 +1,4 @@
-# plugin.video.filmfriend_de
+# plugin.video.filmfriend.de
 
 A plugin for KODI to play shows and movies from https://filmfriend.de
 

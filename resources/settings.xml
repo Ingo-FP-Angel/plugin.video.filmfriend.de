@@ -5,7 +5,7 @@
 			<group id="0" label="">
 				<setting type="action" label="30012" id="libraryPicker">
 					<level>0</level>
-					<data>RunScript(plugin.video.filmfriend, libraryPicker)</data>
+					<data>RunScript(plugin.video.filmfriend.de, libraryPicker)</data>
 					<control type="button" format="action"/>
 				</setting>
 

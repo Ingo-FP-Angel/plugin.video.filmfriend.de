@@ -14,7 +14,7 @@
 		<language>en de</language>
 		<license>GPL-2.0-only</license>
         <forum>https://forum.kodi.tv/showthread.php?tid=374894</forum>
-        <source>https://github.com/Ingo-FP-Angel/plugin.video.filmfriend_de</source>
+        <source>https://github.com/Ingo-FP-Angel/plugin.video.filmfriend.de</source>
         <news>v1.0.2 (2023-12-04)
             Fix video playback that was caused by external dependency
         </news>
