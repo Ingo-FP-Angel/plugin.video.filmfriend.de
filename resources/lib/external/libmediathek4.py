@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
+import json
 import sys
 import urllib
 import urllib.parse
-import json
-from datetime import date, timedelta
 import xbmcaddon
 import xbmcgui
 import xbmcplugin
+from datetime import date, timedelta
+
 
 class lm4:
 	def __init__(self):
@@ -27,10 +28,8 @@ class lm4:
 		#return str(id)
 		if addonid:
 			return xbmcaddon.Addon(id=addonid).getLocalizedString(id)
-		elif id < 32000:
-			return xbmcaddon.Addon().getLocalizedString(id)
 		else:
-			return xbmcaddon.Addon(id='script.module.libmediathek4').getLocalizedString(id)
+			return xbmcaddon.Addon().getLocalizedString(id)
 
 	def sortAZ(self):
 		xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_TITLE_IGNORE_THE)
