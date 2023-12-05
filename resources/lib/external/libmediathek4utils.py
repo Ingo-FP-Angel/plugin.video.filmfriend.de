@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
-import xbmc
-import xbmcplugin
-import xbmcgui
-import xbmcaddon
-import xbmcvfs
 import sys
+import xbmc
+import xbmcaddon
+import xbmcgui
+import xbmcplugin
+import xbmcvfs
 
-temp = xbmc.translatePath(xbmcaddon.Addon().getAddonInfo('profile')+'temp')
-dict = xbmc.translatePath(xbmcaddon.Addon().getAddonInfo('profile')+'dict.py')
+temp = xbmcvfs.translatePath(xbmcaddon.Addon().getAddonInfo('profile')+'temp')
+dict = xbmcvfs.translatePath(xbmcaddon.Addon().getAddonInfo('profile')+'dict.py')
 
 
 
