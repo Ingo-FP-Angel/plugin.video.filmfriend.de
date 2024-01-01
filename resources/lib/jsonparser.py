@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import pyjwt as jwt
+# import pyjwt as jwt
 import requests
 import time
 import xbmcaddon
@@ -184,6 +184,9 @@ def getVideoUrl(videoId):
 	return {'media':[{'url':url, 'licenseserverurl':licenseserverurl, 'type': 'video', 'stream':'DASH'}]}
 
 def _checkTokenExpired():
+	# do nothing for the moment, as importing cryptography (via pyjwt) results in the plugin not loading at all because
+	# "PyO3 modules may only be initialized once per interpreter process"
+	return
 	tokenString = lm4utils.getSetting("access_token")
 	isExpired = False
 	try:
