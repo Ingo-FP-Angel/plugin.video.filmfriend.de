@@ -1,3 +1,7 @@
+v1.0.3
+- [fix] Show message to log in again when login has expired instead of showing generic error
+- [fix] Disable access token expiry check as some "cryptography" module versions make the plugin fail to load at all
+
 v1.0.2
 - [refactor] Temporarily make this add-on independent of script.module.libmediathek4 which has no working version
              so that playback of filmfriend.de content works out-of-the-box
