@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # import pyjwt as jwt
-import requests
 import time
+
+import requests
 import xbmcaddon
 import xbmcgui
 
@@ -177,7 +178,12 @@ def getVideoUrl(videoId):
 		'Authorization':f'Bearer {lm4utils.getSetting("access_token")}'
 	}
 
-	videoInfo = requests.get(f'https://api.tenant.frontend.vod.filmwerte.de/v11/{lm4utils.getSetting("tenant")}/movies/{videoId}/uri',headers=headers).json()
+	response = requests.get(f'https://api.tenant.frontend.vod.filmwerte.de/v11/{lm4utils.getSetting("tenant")}/movies/{videoId}/uri',headers=headers)
+	if response.status_code == 404:
+		# fallback: try if it's an episode
+		response = requests.get(f'https://api.tenant.frontend.vod.filmwerte.de/v11/{lm4utils.getSetting("tenant")}/episodes/{videoId}/uri',headers=headers)
+
+	videoInfo = response.json()
 	url = f'{videoInfo["mpegDash"]}'
 	wvheaders = '&content-type='
 	licenseserverurl = f'{videoInfo["widevineLicenseServerUri"]}|{wvheaders}|R{{SSM}}|'
