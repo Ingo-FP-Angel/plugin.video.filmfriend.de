@@ -103,6 +103,10 @@ msgctxt "#30508"
 msgid "Login credentials wrong"
 msgstr "Login credentials wrong"
 
+msgctxt "#30509"
+msgid "Login expired"
+msgstr "Login expired, please login again"
+
 msgctxt "#30600"
 msgid "Shows"
 msgstr "Shows"

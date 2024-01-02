@@ -1,8 +1,14 @@
 # -*- coding: utf-8 -*-
+# import pyjwt as jwt
 import requests
-import pyjwt as jwt
 import time
+import xbmcaddon
+import xbmcgui
+
 import resources.lib.external.libmediathek4utils as lm4utils
+
+__addon__ = xbmcaddon.Addon()
+__addonname__ = __addon__.getAddonInfo('name')
 
 base = 'https://api.vod.filmwerte.de/api/v1/'
 
@@ -61,6 +67,9 @@ else:
 
 def fetchJson(url,headers=None):
 	response = requests.get(url,headers=headers)
+	if response.status_code == 401:
+		xbmcgui.Dialog().ok(__addonname__, lm4utils.getTranslation(30509))
+		return
 	if response.status_code > 299:
 		raise RuntimeError(f"Fetching '{url}' failed with code '{response.status_code}' and optional message '{response.text}'")
 
@@ -84,6 +93,8 @@ def parseSearch(params,content='videos'):
 
 def parseResponse(responseJson,content='videos'):
 	res = {'items':[],'content':content,'pagination':{'currentPage':0}}
+	if responseJson is None or 'results' not in responseJson:
+		return res
 	for item in responseJson['results']:
 		result = item
 		if 'result' in item:
@@ -95,7 +106,7 @@ def parseResponse(responseJson,content='videos'):
 			d['metadata']['name'] = _getString(result,'title')
 			d['metadata']['plot'] = _getString(result,'synopsis')
 			d['metadata']['art'] = _getArt(result)
-			
+
 			d['params']['params'] = f'?kinds=Season&series={result["id"]}&orderBy={lang["order"]}&sortDirection=Ascending'
 			res['items'].append(d)
 
@@ -173,6 +184,9 @@ def getVideoUrl(videoId):
 	return {'media':[{'url':url, 'licenseserverurl':licenseserverurl, 'type': 'video', 'stream':'DASH'}]}
 
 def _checkTokenExpired():
+	# do nothing for the moment, as importing cryptography (via pyjwt) results in the plugin not loading at all because
+	# "PyO3 modules may only be initialized once per interpreter process"
+	return
 	tokenString = lm4utils.getSetting("access_token")
 	isExpired = False
 	try:
