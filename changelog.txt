@@ -1,3 +1,6 @@
+v1.0.4
+- [fix] Allow playback of episodes
+
 v1.0.3
 - [fix] Show message to log in again when login has expired instead of showing generic error
 - [fix] Disable access token expiry check as some "cryptography" module versions make the plugin fail to load at all
