@@ -107,6 +107,14 @@ msgctxt "#30509"
 msgid "Login expired"
 msgstr "Login abgelaufen, bitte neu anmelden"
 
+msgctxt "#30510"
+msgid "Login not possible"
+msgstr "Login nicht möglich"
+
+msgctxt "#30511"
+msgid "Login provider not supported"
+msgstr "Die ausgewählte Bibliothek nutzt ein Login-Verfahren, das noch nicht unterstützt wird."
+
 msgctxt "#30600"
 msgid "Shows"
 msgstr "Serien"

@@ -107,6 +107,14 @@ msgctxt "#30509"
 msgid "Login expired"
 msgstr "Login expired, please login again"
 
+msgctxt "#30510"
+msgid "Login not possible"
+msgstr "Login not possible"
+
+msgctxt "#30511"
+msgid "Login provider not supported"
+msgstr "The selected library used a login procedure that is not yet supported."
+
 msgctxt "#30600"
 msgid "Shows"
 msgstr "Shows"

@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 import requests
+import xbmcaddon
 import xbmcgui
+
 import resources.lib.external.libmediathek4utils as lm4utils
+
+__addon__ = xbmcaddon.Addon()
 
 base = 'https://api.tenant-group.frontend.vod.filmwerte.de/v7/'
 providerBase = 'https://api.tenant.frontend.vod.filmwerte.de/v11/'
@@ -17,22 +21,29 @@ def pick():
 	tenant = j['tenants'][int(i)]['id']
 	library = j['tenants'][int(i)]['displayName']
 
-	username = xbmcgui.Dialog().input(lm4utils.getTranslation(30500)) 
-	if username == '':
-		lm4utils.displayMsg(lm4utils.getTranslation(30501), lm4utils.getTranslation(30502))
-		return
-
-	password = xbmcgui.Dialog().input(lm4utils.getTranslation(30503)) 
-	if password == '':
-		lm4utils.displayMsg(lm4utils.getTranslation(30504), lm4utils.getTranslation(30505))
-		return
-
 	r = requests.get(f'{providerBase}{tenant}/sign-in')
 	if r.text == '':
 		lm4utils.displayMsg(lm4utils.getTranslation(30506), lm4utils.getTranslation(30507))
 		return
 
 	j = r.json()
+
+	# so far we only support login for libraries that have a "delegated" provider (not "external")
+	if len(j['delegated']) == 0:
+		lm4utils.log(f'[{__addon__}] Unsupported library because login provider is not "delegated": {library}')
+		lm4utils.displayMsg(lm4utils.getTranslation(30510), lm4utils.getTranslation(30511))
+		return
+
+	username = xbmcgui.Dialog().input(lm4utils.getTranslation(30500))
+	if username == '':
+		lm4utils.displayMsg(lm4utils.getTranslation(30501), lm4utils.getTranslation(30502))
+		return
+
+	password = xbmcgui.Dialog().input(lm4utils.getTranslation(30503))
+	if password == '':
+		lm4utils.displayMsg(lm4utils.getTranslation(30504), lm4utils.getTranslation(30505))
+		return
+
 	provider = j['delegated'][0]['provider']
 	client_id = f'tenant-{tenant}-filmwerte-vod-frontend'
 
