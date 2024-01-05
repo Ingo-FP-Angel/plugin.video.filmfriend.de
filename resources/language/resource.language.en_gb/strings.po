@@ -115,6 +115,14 @@ msgctxt "#30511"
 msgid "Login provider not supported"
 msgstr "The selected library used a login procedure that is not yet supported."
 
+msgctxt "#30512"
+msgid "Login required"
+msgstr "Login required"
+
+msgctxt "#30513"
+msgid "Please login first"
+msgstr "Please login first"
+
 msgctxt "#30600"
 msgid "Shows"
 msgstr "Shows"

@@ -90,8 +90,12 @@ def parseMain():
 
 def parseWatchList(params,content='videos'):
 	_checkTokenExpired()
+	token = lm4utils.getTokenWithErrorNotification()
+	if token is None or token == '':
+		return _emptyPage(content)
+
 	headers = {
-		'Authorization':f'Bearer {lm4utils.getSetting("access_token")}'
+		'Authorization':f'Bearer {token}'
 	}
 
 	j = fetchJson(f'https://api.tenant.frontend.vod.filmwerte.de/v11/{lm4utils.getSetting("tenant")}/watchlist{params}',headers)
@@ -102,7 +106,7 @@ def parseSearch(params,content='videos'):
 	return parseResponse(j,content)
 
 def parseResponse(responseJson,content='videos'):
-	res = {'items':[],'content':content,'pagination':{'currentPage':0}}
+	res = _emptyPage(content)
 	if responseJson is None or 'results' not in responseJson:
 		return res
 	for item in responseJson['results']:
@@ -187,6 +191,10 @@ def parseResponse(responseJson,content='videos'):
 
 def getVideoUrl(videoId):
 	_checkTokenExpired()
+	token = lm4utils.getTokenWithErrorNotification()
+	if token is None or token == '':
+		return _emptyMedia()
+
 	headers = {
 		'Authorization':f'Bearer {lm4utils.getSetting("access_token")}'
 	}
@@ -201,6 +209,12 @@ def getVideoUrl(videoId):
 	wvheaders = '&content-type='
 	licenseserverurl = f'{videoInfo["widevineLicenseServerUri"]}|{wvheaders}|R{{SSM}}|'
 	return {'media':[{'url':url, 'licenseserverurl':licenseserverurl, 'type': 'video', 'stream':'DASH'}]}
+
+def _emptyPage(content='videos'):
+	return {'items': [], 'content': content, 'pagination': {'currentPage': 0}}
+
+def _emptyMedia():
+	return {'media':[]}
 
 def _checkTokenExpired():
 	# do nothing for the moment, as importing cryptography (via pyjwt) results in the plugin not loading at all because

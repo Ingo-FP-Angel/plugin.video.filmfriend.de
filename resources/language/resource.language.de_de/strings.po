@@ -115,6 +115,14 @@ msgctxt "#30511"
 msgid "Login provider not supported"
 msgstr "Die ausgewählte Bibliothek nutzt ein Login-Verfahren, das noch nicht unterstützt wird."
 
+msgctxt "#30512"
+msgid "Login required"
+msgstr "Login benötigt"
+
+msgctxt "#30513"
+msgid "Please login first"
+msgstr "Bitte zunächst anmelden"
+
 msgctxt "#30600"
 msgid "Shows"
 msgstr "Serien"

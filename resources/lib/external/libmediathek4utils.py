@@ -49,4 +49,9 @@ def getISO6391():
 
 def displayMsg(a,b):
 	xbmcgui.Dialog().notification(a,b,time=10000)
-	
+
+def getTokenWithErrorNotification():
+	token = getSetting("access_token")
+	if token is None or token == '':
+		displayMsg(getTranslation(30512), getTranslation(30513))
+	return token
