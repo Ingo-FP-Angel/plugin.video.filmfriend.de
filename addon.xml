@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<addon id="plugin.video.filmfriend.de" name="Filmfriend.de (Kodinerds)" version="1.0.5" provider-name="Ingo-FP-Angel, sarbes">
+<addon id="plugin.video.filmfriend.de" name="Filmfriend.de (Kodinerds)" version="1.0.6" provider-name="Ingo-FP-Angel, sarbes">
     <requires>
 		<import addon="xbmc.python" version="3.0.0"/>
-		<import addon="script.module.pyjwt" version="1.7.1"/>
 		<import addon="script.module.requests" version="2.19.1"/>
 		<import addon="inputstream.adaptive" version="2.5.4"/>
     </requires>
@@ -17,6 +16,7 @@
         <source>https://github.com/Ingo-FP-Angel/plugin.video.filmfriend.de</source>
         <news>v1.0.5 (2024-01-05)
             Fix empty titles
+            Show hint to log in first before playing videos or browsing the watchlist
         </news>
         <website>https://www.filmfriend.de/</website>
         <summary lang="en_GB">This video add-on provides access to shows and movies of Filmfriend.de.</summary>

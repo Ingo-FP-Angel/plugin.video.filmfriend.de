@@ -1,3 +1,8 @@
+v1.0.6
+- [fix]   Show meaningful message if login for selected library is not supported yet
+- [fix]   Show hint to log in first before playing videos or browsing the watchlist
+- [chore] Debug log consistently uses addon ID as message prefix
+
 v1.0.5
 - [fix] Sometimes media titles were empty
 
