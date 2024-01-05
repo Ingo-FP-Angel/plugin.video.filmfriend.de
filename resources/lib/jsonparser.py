@@ -217,13 +217,13 @@ def _checkTokenExpired():
 		isExpired = True
 	
 	if isExpired:
-		lm4utils.log("Access token for filmfried.de expired. Will fetch new token.")
+		lm4utils.log(f"[{__addon__}] Access token expired. Will fetch new token.")
 		_getNewToken()
 
 def _getNewToken():
 	refresh_token = lm4utils.getSetting('refresh_token')
-	if refresh_token == '':
-		lm4utils.log("Cannot fetch new access token for filmfried.de. Refresh token is missing.")
+	if refresh_token is None or refresh_token == '':
+		lm4utils.log(f"[{__addon__}] Cannot fetch new access token. Refresh token is missing.")
 		return False
 	files = {'client_id':(None, f'tenant-{lm4utils.getSetting("tenant")}-filmwerte-vod-frontend'),'grant_type':(None, 'refresh_token'),'refresh_token':(None, refresh_token),'scope':(None, 'filmwerte-vod-api offline_access')}
 	j = requests.post('https://api.vod.filmwerte.de/connect/token', files=files).json()
