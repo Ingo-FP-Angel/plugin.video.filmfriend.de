@@ -1,3 +1,6 @@
+v1.0.5
+- [fix] Sometimes media titles were empty
+
 v1.0.4
 - [fix] Allow playback of episodes
 
