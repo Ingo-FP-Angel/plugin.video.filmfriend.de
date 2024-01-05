@@ -56,17 +56,26 @@ languages = {
 	'it':italian,
 }
 
-s = lm4utils.getSetting('language')
-if s in ['system','']:
+langCode = lm4utils.getSetting('language')
+if langCode in ['system', '']:
 	l = lm4utils.getISO6391()
 	if l in languages:
-		lang = languages[l]
+		langCode = l
 	else:
-		lang = languages['en']
-else:
-	lang = languages[s]
+		langCode = 'en'
+
+lang = languages[langCode]
 
 def fetchJson(url,headers=None):
+	if headers is None:
+		headers = {
+			'Accept-Language': langCode
+		}
+	else:
+		headers.update({
+			'Accept-Language': langCode
+		})
+
 	response = requests.get(url,headers=headers)
 	if response.status_code == 401:
 		xbmcgui.Dialog().ok(__addonname__, lm4utils.getTranslation(30509))
@@ -170,6 +179,10 @@ def parseResponse(responseJson,content='videos'):
 
 			d['params']['video'] = result["id"]
 			res['items'].append(d)
+
+		else:
+			lm4utils.log(f'[{__addon__}] Unsupported kind of media: {item["kind"]}')
+
 	return res
 
 def getVideoUrl(videoId):
@@ -220,7 +233,7 @@ def _getNewToken():
 
 def _getString(d,k):
 	try:
-		s = d.get(lang[k],d[english[k]])
+		s = d.get(lang[k], '')
 		if s != '':
 			return s
 		else:
