@@ -8,6 +8,8 @@ jobs:
   build_release:
     name: build_release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: checkout
