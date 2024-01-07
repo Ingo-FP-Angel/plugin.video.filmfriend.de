@@ -14,9 +14,8 @@
 		<license>GPL-2.0-only</license>
         <forum>https://forum.kodi.tv/showthread.php?tid=374894</forum>
         <source>https://github.com/Ingo-FP-Angel/plugin.video.filmfriend.de</source>
-        <news>v1.0.5 (2024-01-05)
-            Fix empty titles
-            Show hint to log in first before playing videos or browsing the watchlist
+        <news>v1.0.6 (2024-01-05)
+            Show meaningful messages when library is not supported yet or playback is started/watchlist is accessed without login
         </news>
         <website>https://www.filmfriend.de/</website>
         <summary lang="en_GB">This video add-on provides access to shows and movies of Filmfriend.de.</summary>
