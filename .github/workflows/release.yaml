@@ -1,0 +1,29 @@
+name: release
+
+on:
+  # manual trigger
+  workflow_dispatch:
+
+jobs:
+  build_release:
+    name: build_release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: get version from addon.xml
+        id: version
+        run: |
+          version=$(grep "<addon" plugin.video.filmfriend.de/addon.xml | cut -d '"' -f 6)
+          echo "VERSION=$version" >> "$GITHUB_OUTPUT"
+
+      - name: create addon ZIP
+        run: zip -D -r plugin.video.filmfriend.de-${{ steps.version.outputs.VERSION }}.zip plugin.video.filmfriend.de
+
+      - name: release
+        uses: ncipollo/release-action@v1
+        id: create_release
+        with:
+          artifacts: plugin.video.filmfriend.de-${{ steps.version.outputs.VERSION }}.zip
