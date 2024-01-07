@@ -26,9 +26,7 @@ jobs:
 
       - name: get changes in version
         id: changelog
-        run: |
-          changes=$(sed -n "/^v${{ steps.version.outputs.VERSION }}/, /^v.*/{ /^v.*/!p }" changelog.txt)
-          echo "CHANGES=$changes" >> "$GITHUB_OUTPUT"
+        run: sed -n "/^v${{ steps.version.outputs.VERSION }}/, /^v.*/{ /^v.*/!p }" changelog.txt > release_message.txt
 
       - name: release
         uses: ncipollo/release-action@v1
@@ -37,4 +35,4 @@ jobs:
           artifacts: plugin.video.filmfriend.de-${{ steps.version.outputs.VERSION }}.zip
           tag: ${{ steps.version.outputs.VERSION }}
           commit: ${{ github.sha }}
-          body: ${{ steps.changelog.outputs.CHANGES }}
+          bodyFile: release_message.txt
