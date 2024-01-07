@@ -24,6 +24,12 @@ jobs:
       - name: create addon ZIP
         run: zip -D -r plugin.video.filmfriend.de-${{ steps.version.outputs.VERSION }}.zip plugin.video.filmfriend.de
 
+      - name: get changes in version
+        id: changelog
+        run: |
+          changes=$(sed -n "/^v${{ steps.version.outputs.VERSION }}/, /^v.*/{ /^v.*/!p }" changelog.txt)
+          echo "CHANGES=changes" >> "$GITHUB_OUTPUT"
+
       - name: release
         uses: ncipollo/release-action@v1
         id: create_release
@@ -31,3 +37,4 @@ jobs:
           artifacts: plugin.video.filmfriend.de-${{ steps.version.outputs.VERSION }}.zip
           tag: ${{ steps.version.outputs.VERSION }}
           commit: ${{ github.sha }}
+          body: ${{ steps.changelog.outputs.CHANGES }}
