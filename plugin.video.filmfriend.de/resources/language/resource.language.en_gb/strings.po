@@ -135,6 +135,14 @@ msgctxt "#30602"
 msgid "Watchlist"
 msgstr "Watchlist"
 
+msgctxt "#30603"
+msgid "unavailable"
+msgstr "Not available"
+
+msgctxt "#30604"
+msgid "Video unavailable"
+msgstr "The video is not available (anymore)"
+
 ### translations below are imported from "script.module.libmediathek4" that's currently broken
 msgctxt "#32000"
 msgid "This month"

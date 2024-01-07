@@ -9,6 +9,7 @@ import xbmcgui
 import resources.lib.external.libmediathek4utils as lm4utils
 
 __addon__ = xbmcaddon.Addon()
+__addonid__ = __addon__.getAddonInfo('id')
 __addonname__ = __addon__.getAddonInfo('name')
 
 base = 'https://api.vod.filmwerte.de/api/v1/'
@@ -185,7 +186,7 @@ def parseResponse(responseJson,content='videos'):
 			res['items'].append(d)
 
 		else:
-			lm4utils.log(f'[{__addon__}] Unsupported kind of media: {item["kind"]}')
+			lm4utils.log(f'[{__addonid__}] Unsupported kind of media: {item["kind"]}')
 
 	return res
 
@@ -199,10 +200,31 @@ def getVideoUrl(videoId):
 		'Authorization':f'Bearer {lm4utils.getSetting("access_token")}'
 	}
 
-	response = requests.get(f'https://api.tenant.frontend.vod.filmwerte.de/v11/{lm4utils.getSetting("tenant")}/movies/{videoId}/uri',headers=headers)
-	if response.status_code == 404:
+	# first check the media type and if it's currently available
+	mediaType = "movies"
+	hasDetails = False
+	available = False
+	response = requests.get(f'https://api.tenant.frontend.vod.filmwerte.de/v11/{lm4utils.getSetting("tenant")}/{mediaType}/{videoId}',headers=headers)
+	if response.status_code == 200:
+		hasDetails = True
+		available = response.json()["state"]["kind"] == "Active"
+		response = requests.get(f'https://api.tenant.frontend.vod.filmwerte.de/v11/{lm4utils.getSetting("tenant")}/{mediaType}/{videoId}/uri',headers=headers)
+	elif response.status_code == 404:
 		# fallback: try if it's an episode
-		response = requests.get(f'https://api.tenant.frontend.vod.filmwerte.de/v11/{lm4utils.getSetting("tenant")}/episodes/{videoId}/uri',headers=headers)
+		mediaType = "episodes"
+		response = requests.get(f'https://api.tenant.frontend.vod.filmwerte.de/v11/{lm4utils.getSetting("tenant")}/{mediaType}/{videoId}',headers=headers)
+		if response.status_code == 200:
+			hasDetails = True
+			available = response.json()["state"]["kind"] == "Active"
+			response = requests.get(f'https://api.tenant.frontend.vod.filmwerte.de/v11/{lm4utils.getSetting("tenant")}/{mediaType}/{videoId}/uri',headers=headers)
+		else:
+			lm4utils.log(f"[{__addonid__}] Unexpected status code when getting media details with fallback: {response.status_code}.")
+	else:
+		lm4utils.log(f"[{__addonid__}] Unexpected status code when getting media details: {response.status_code}.")
+
+	if hasDetails and not available:
+		lm4utils.displayMsg(lm4utils.getTranslation(30603), lm4utils.getTranslation(30604))
+		return _emptyMedia()
 
 	videoInfo = response.json()
 	url = f'{videoInfo["mpegDash"]}'
