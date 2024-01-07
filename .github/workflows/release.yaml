@@ -27,3 +27,5 @@ jobs:
         id: create_release
         with:
           artifacts: plugin.video.filmfriend.de-${{ steps.version.outputs.VERSION }}.zip
+          tag: ${{ steps.version.outputs.VERSION }}
+          commit: ${{ github.sha }}
