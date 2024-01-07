@@ -1,3 +1,7 @@
+v1.0.7
+- [fix] Check availability of video before playback
+- [fix] Fix debug log prefix
+
 v1.0.6
 - [fix]   Show meaningful message if login for selected library is not supported yet
 - [fix]   Show hint to log in first before playing videos or browsing the watchlist
