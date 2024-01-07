@@ -28,7 +28,7 @@ jobs:
         id: changelog
         run: |
           changes=$(sed -n "/^v${{ steps.version.outputs.VERSION }}/, /^v.*/{ /^v.*/!p }" changelog.txt)
-          echo "CHANGES=changes" >> "$GITHUB_OUTPUT"
+          echo "CHANGES=$changes" >> "$GITHUB_OUTPUT"
 
       - name: release
         uses: ncipollo/release-action@v1
