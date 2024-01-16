@@ -123,6 +123,22 @@ msgctxt "#30513"
 msgid "Please login first"
 msgstr "Bitte zunächst anmelden"
 
+msgctxt "#30514"
+msgid "Consent to transfer of data"
+msgstr "Einwilligung zur Datenübermittlung"
+
+msgctxt "#30515"
+msgid "By logging in you consent to the same transfer of data as with login via browser, typically your age rating."
+msgstr "Mit dem Login akzeptieren Sie die Datenübermittlung wie beim Login per Browser, i.d.R. Ihre Altersfreigabe."
+
+msgctxt "#30516"
+msgid "Cancel"
+msgstr "Abbrechen"
+
+msgctxt "#30517"
+msgid "Agree"
+msgstr "Zustimmen"
+
 msgctxt "#30600"
 msgid "Shows"
 msgstr "Serien"

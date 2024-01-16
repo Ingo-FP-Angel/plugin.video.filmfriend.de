@@ -123,6 +123,22 @@ msgctxt "#30513"
 msgid "Please login first"
 msgstr "Please login first"
 
+msgctxt "#30514"
+msgid "Consent to transfer of data"
+msgstr "Consent to transfer of data"
+
+msgctxt "#30515"
+msgid "By logging in you consent to the same transfer of data as with login via browser, typically your age rating."
+msgstr "By logging in, you consent to the same transfer of data as with login via browser, typically your age rating."
+
+msgctxt "#30516"
+msgid "Cancel"
+msgstr "Cancel"
+
+msgctxt "#30517"
+msgid "Agree"
+msgstr "Agree"
+
 msgctxt "#30600"
 msgid "Shows"
 msgstr "Shows"
