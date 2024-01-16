@@ -173,8 +173,6 @@ def pick():
         }
         lm4utils.log(f'[{__addonid__}] parsed token information: {json.dumps(j)}')
 
-        return j
-
     lm4utils.setSetting('domain', domain)
     lm4utils.setSetting('tenant', tenant)
     lm4utils.setSetting('library', library)
