@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import http.cookiejar as cookielib
 import json
 import re
 import urllib.parse
@@ -71,15 +70,13 @@ def pick():
                 lm4utils.displayMsg(lm4utils.getTranslation(30506), lm4utils.getTranslation(30507))
             return
     else:
-        cookieJar = cookielib.LWPCookieJar()
+        session = requests.session()
         authExternalUrl = f'https://api.vod.filmwerte.de/connect/authorize-external?clientId=tenant-{tenant}-filmwerte-vod-frontend&provider={provider}&redirectUri=https://{domain}/de/sign-in/completed'
         headers = {
             'Accept-Language': 'de, en;q=0.8, *;q=0.5'
         }
         lm4utils.log(f'[{__addonid__}] authorize-external GET: {authExternalUrl}')
-        response = requests.get(authExternalUrl, headers=headers, cookies=cookieJar)
-        for respCookie in response.cookies:
-            cookieJar.set_cookie(respCookie)
+        response = session.get(authExternalUrl, headers=headers)
         lm4utils.log(f'[{__addonid__}] authorize-external status: {response.status_code}')
         lm4utils.log(f'[{__addonid__}] authorize-external headers: {response.headers}')
         lm4utils.log(f'[{__addonid__}] authorize-external body: {response.text}')
@@ -102,9 +99,7 @@ def pick():
             'Accept-Language':           'de, en;q=0.8, *;q=0.5',
         }
         lm4utils.log(f'[{__addonid__}] user/pass submit POST: {logincheckUrl}')
-        response = requests.post(logincheckUrl, headers=headers, data=formdata, cookies=cookieJar)
-        for respCookie in response.cookies:
-            cookieJar.set_cookie(respCookie)
+        response = session.post(logincheckUrl, headers=headers, data=formdata)
         lm4utils.log(f'[{__addonid__}] user/pass submit status: {response.status_code}')
         lm4utils.log(f'[{__addonid__}] user/pass submit headers: {response.headers}')
         lm4utils.log(f'[{__addonid__}] user/pass submit body: {response.text}')
@@ -126,14 +121,12 @@ def pick():
         }
         lm4utils.log(f'[{__addonid__}] consent submit POST: {consentUrl}')
         lm4utils.log(f'[{__addonid__}] consent submit formdata: {formdata}')
-        response = requests.post(consentUrl, headers=headers, data=formdata, cookies=cookieJar, allow_redirects=False)
-        for respCookie in response.cookies:
-            cookieJar.set_cookie(respCookie)
+        response = session.post(consentUrl, headers=headers, data=formdata, allow_redirects=False)
         lm4utils.log(f'[{__addonid__}] consent submit status: {response.status_code}')
         lm4utils.log(f'[{__addonid__}] consent submit headers: {response.headers}')
         lm4utils.log(f'[{__addonid__}] consent submit body: {response.text}')
 
-        # should be https://api.vod.filmwerte.de/authorize/callback-{provider id}?code={some auth code}
+        # should be https://api.vod.filmwerte.de/authorize/callback-{provider id}?code={some auth code}?state={some state}
         firstRedirectUrl = response.headers['Location']
         headers = {
             'User-Agent':                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36',
@@ -143,9 +136,7 @@ def pick():
             'Accept-Language':           'de, en;q=0.8, *;q=0.5',
         }
         lm4utils.log(f'[{__addonid__}] first redirect GET: {firstRedirectUrl}')
-        response = requests.get(firstRedirectUrl, headers=headers, cookies=cookieJar, allow_redirects=False)
-        for respCookie in response.cookies:
-            cookieJar.set_cookie(respCookie)
+        response = session.get(firstRedirectUrl, headers=headers, allow_redirects=False)
         lm4utils.log(f'[{__addonid__}] first redirect status: {response.status_code}')
         lm4utils.log(f'[{__addonid__}] first redirect headers: {response.headers}')
         lm4utils.log(f'[{__addonid__}] first redirect body: {response.text}')
@@ -164,9 +155,7 @@ def pick():
             'Accept-Language':           'de, en;q=0.8, *;q=0.5',
         }
         lm4utils.log(f'[{__addonid__}] second redirect GET: {secondRedirectUrl}')
-        response = requests.get(secondRedirectUrl, headers=headers, cookies=cookieJar, allow_redirects=False)
-        for respCookie in response.cookies:
-            cookieJar.set_cookie(respCookie)
+        response = session.get(secondRedirectUrl, headers=headers, allow_redirects=False)
         lm4utils.log(f'[{__addonid__}] second redirect status: {response.status_code}')
         lm4utils.log(f'[{__addonid__}] second redirect headers: {response.headers}')
         lm4utils.log(f'[{__addonid__}] second redirect body: {response.text}')
@@ -177,10 +166,10 @@ def pick():
         lm4utils.log(f'[{__addonid__}] third redirect GET: {thirdRedirectUrl}')
         parsedToken = re.search(r".*access_token=(.*)&token_type=(.*)&expires_in=(.*)&refresh_token=(.*)", thirdRedirectUrl)
         j = {
-            "access_token": parsedToken.groups(1),
-            "token_type": parsedToken.groups(2),
-            "expires_in": parsedToken.groups(3),
-            "refresh_token": parsedToken.groups(4),
+            "access_token": parsedToken.group(1),
+            "token_type": parsedToken.group(2),
+            "expires_in": parsedToken.group(3),
+            "refresh_token": parsedToken.group(4),
         }
         lm4utils.log(f'[{__addonid__}] parsed token information: {json.dumps(j)}')
 
