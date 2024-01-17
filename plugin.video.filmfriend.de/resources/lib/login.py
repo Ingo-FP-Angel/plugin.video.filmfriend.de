@@ -25,14 +25,17 @@ def pick():
     domain = j['tenants'][int(i)]['clients']['web']['domain']
     tenant = j['tenants'][int(i)]['id']
     library = j['tenants'][int(i)]['displayName']
+    lm4utils.log(f'[{__addonid__}] selected library: {library}')
+    lm4utils.log(f'[{__addonid__}] tenant id of selected library: {tenant}')
 
-    # get information about the possible login providers of the selected library
+# get information about the possible login providers of the selected library
     r = requests.get(f'{providerBase}{tenant}/sign-in')
     if r.text == '':
         lm4utils.displayMsg(lm4utils.getTranslation(30506), lm4utils.getTranslation(30507))
         return
 
     j = r.json()
+    lm4utils.log(f'[{__addonid__}] provider info of selected library: {j}')
 
     if len(j['external']) > 0:
         # ask for consent to grant access to the age rating during login
@@ -40,9 +43,12 @@ def pick():
                                      lm4utils.getTranslation(30516), lm4utils.getTranslation(30517))
         if not ret:
             return
+
         providerType = 'external'
     else:
         providerType = 'delegated'
+
+    lm4utils.log(f'[{__addonid__}] provider type to use for selected library: {providerType}')
 
     username = xbmcgui.Dialog().input(lm4utils.getTranslation(30500))
     if username == '':
@@ -57,7 +63,7 @@ def pick():
     provider = j[providerType][0]['provider']
     client_id = f'tenant-{tenant}-filmwerte-vod-frontend'
 
-    if provider == 'delegated':
+    if providerType == 'delegated':
         files = {'client_id': (None, client_id), 'provider': (None, provider), 'username': (None, username),
                  'password': (None, password), 'scope': (None, 'filmwerte-vod-api offline_access')}
         j = requests.post('https://api.vod.filmwerte.de/connect/authorize-external', files=files).json()
