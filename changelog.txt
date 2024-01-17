@@ -1,3 +1,6 @@
+v1.0.8
+- [feat] Add support for libraries with external authentication (i.e. intermediate login page for age consent)
+
 v1.0.7
 - [fix] Check availability of video before playback
 - [fix] Fix debug log prefix
