@@ -1,7 +1,6 @@
-name: release
+name: build_and_release
 
 on:
-  # manual trigger
   workflow_dispatch:
 
 jobs:
