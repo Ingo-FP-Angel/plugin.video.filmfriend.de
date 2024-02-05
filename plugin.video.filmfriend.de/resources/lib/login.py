@@ -184,5 +184,6 @@ def pick():
     lm4utils.setSetting('tenant', tenant)
     lm4utils.setSetting('library', library)
     lm4utils.setSetting('username', username)
+    lm4utils.setSetting('provider', provider)
     lm4utils.setSetting('access_token', j['access_token'])
     lm4utils.setSetting('refresh_token', j['refresh_token'])

@@ -67,6 +67,10 @@ msgctxt "#30053"
 msgid "Refresh Token"
 msgstr "Refresh Token"
 
+msgctxt "#30054"
+msgid "Provider"
+msgstr "Provider"
+
 msgctxt "#30500"
 msgid "Username"
 msgstr "Nutzername"
