@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-# import pyjwt as jwt
+import base64
+import json
 import time
 
 import requests
+import resources.lib.external.libmediathek4utils as lm4utils
 import xbmcaddon
 import xbmcgui
-
-import resources.lib.external.libmediathek4utils as lm4utils
 
 __addon__ = xbmcaddon.Addon()
 __addonid__ = __addon__.getAddonInfo('id')
@@ -239,33 +239,59 @@ def _emptyMedia():
 	return {'media':[]}
 
 def _checkTokenExpired():
-	# do nothing for the moment, as importing cryptography (via pyjwt) results in the plugin not loading at all because
-	# "PyO3 modules may only be initialized once per interpreter process"
-	return
 	tokenString = lm4utils.getSetting("access_token")
+	if tokenString is None or tokenString == '':
+		lm4utils.log(f"[{__addonid__}] Access token missing, cannot check token expiration. Need to login first?")
+		return
+
 	isExpired = False
 	try:
-		token = jwt.decode(tokenString, key="", algorithms=["RSA256"], options={"verify_signature":False, "verify_aud":False})
-		expiry = token['exp']
+		# not using "pyjwt" as it uses "cryptography" and some versions of that module make the addon fail to load
+		# with "PyO3 modules may only be initialized once per interpreter process"
+		# so yes, were not properly validating the token, just getting the expiration value
+		tokenBody = base64.decode(tokenString.split(".")[1])
+		expiry = tokenBody['exp']
 		if expiry <= time.time():
 			isExpired = True
-	except jwt.exceptions.ExpiredSignatureError:
+	except:
 		isExpired = True
 	
 	if isExpired:
-		lm4utils.log(f"[{__addon__}] Access token expired. Will fetch new token.")
+		lm4utils.log(f"[{__addonid__}] Access token expired. Will fetch new token.")
 		_getNewToken()
 
 def _getNewToken():
 	refresh_token = lm4utils.getSetting('refresh_token')
 	if refresh_token is None or refresh_token == '':
-		lm4utils.log(f"[{__addon__}] Cannot fetch new access token. Refresh token is missing.")
-		return False
-	files = {'client_id':(None, f'tenant-{lm4utils.getSetting("tenant")}-filmwerte-vod-frontend'),'grant_type':(None, 'refresh_token'),'refresh_token':(None, refresh_token),'scope':(None, 'filmwerte-vod-api offline_access')}
-	j = requests.post('https://api.vod.filmwerte.de/connect/token', files=files).json()
+		lm4utils.log(f"[{__addonid__}] Cannot fetch new access token. Refresh token is missing.")
+		return
+
+	# saving the provider in the addon settings was introduced in v1.0.9
+	# if last login was done in an earlier version the provider will be empty
+	# in this case the user will have to manually login again
+	# this check can be removed in a later version
+	provider = lm4utils.getSetting("provider")
+	if provider is None or provider == '':
+		lm4utils.log(f"[{__addonid__}] Cannot fetch new access token. Provider value is missing.")
+		return
+
+	formdata = {
+		'client_id': f'tenant-{lm4utils.getSetting("tenant")}-filmwerte-vod-frontend',
+		'provider': provider,
+		'refresh_token': refresh_token,
+		'grant_type': 'refresh_token',
+		'scope': 'filmwerte-vod-api offline_access'
+	}
+	headers = {
+		"Content-Type": 'application/x-www-form-urlencoded',
+	}
+	tokenUrl = 'https://api.vod.filmwerte.de/connect/token'
+	lm4utils.log(f'[{__addonid__}] token refresh POST: {tokenUrl}')
+	lm4utils.log(f'[{__addonid__}] token refresh formdata: {formdata}')
+	j = requests.post(tokenUrl, headers=headers, data=formdata).json()
+	lm4utils.log(f"[{__addonid__}] token refresh body: {json.dumps(j)}")
 	lm4utils.setSetting('access_token', j['access_token'])
 	lm4utils.setSetting('refresh_token', j['refresh_token'])
-	return j['access_token']
 
 def _getString(d,k):
 	try:
