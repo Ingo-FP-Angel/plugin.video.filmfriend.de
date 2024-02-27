@@ -51,6 +51,22 @@ msgctxt "#30025"
 msgid "Italian"
 msgstr "Italian"
 
+msgctxt "#30031"
+msgid "Select country"
+msgstr "Select country"
+
+msgctxt "#30032"
+msgid "Austria"
+msgstr "Austria"
+
+msgctxt "#30033"
+msgid "Germany"
+msgstr "Germany"
+
+msgctxt "#30034"
+msgid "Switzerland"
+msgstr "Switzerland"
+
 msgctxt "#30050"
 msgid "Domain"
 msgstr "Domain"

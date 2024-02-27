@@ -14,13 +14,50 @@ __addonid__ = __addon__.getAddonInfo('id')
 base = 'https://api.tenant-group.frontend.vod.filmwerte.de/v7/'
 providerBase = 'https://api.tenant.frontend.vod.filmwerte.de/v11/'
 
+countries = [
+    { "code": "at", "displayName": lm4utils.getTranslation(30032), "libraryListId": "8bd3757f-bb3f-4ffe-9543-3424497ef47d" },
+    { "code": "de", "displayName": lm4utils.getTranslation(30033), "libraryListId": "fba2f8b5-6a3a-4da3-b555-21613a88d3ef" },
+    { "code": "ch", "displayName": lm4utils.getTranslation(30034), "libraryListId": "b9b657d4-48c4-4827-a257-d1b0b44a278a" },
+]
+
 def pick():
-    # get all supported libraries
-    j = requests.get(f'{base}fba2f8b5-6a3a-4da3-b555-21613a88d3ef/sign-in').json()
+    previousCountry = lm4utils.getSetting('country')
+    previousLibrary = lm4utils.getSetting('library')
+    lm4utils.log(f'[{__addonid__}] previousCountry: {previousCountry}')
+    lm4utils.log(f'[{__addonid__}] previousLibrary: {previousLibrary}')
+    # this only happens on first use after updating from v1.0.9 or earlier to v1.0.10 or later
+    # up to v1.0.9 only Germany was supported and there was no country setting
+    # so set country to de if it was empty but a library had already been selected
+    if previousCountry == "" and not previousLibrary == "":
+        previousCountry = "de"
+        lm4utils.log(f'[{__addonid__}] updated empty previousCountry to "de" because library was set')
+
+    c = []
+    cidx = -1
+    for idx, country in enumerate(countries):
+        c.append(xbmcgui.ListItem(country["displayName"]))
+        if country["code"] == previousCountry:
+            cidx = idx
+
+    lm4utils.log(f'[{__addonid__}] preselect index for country: {cidx}')
+    i = xbmcgui.Dialog().select(lm4utils.getTranslation(30031), c, preselect = cidx)
+    lm4utils.log(f'[{__addonid__}] selected index for country: {i}')
+
+    if i == -1: # selection was canceled
+        return
+
+    country = countries[i]
+
+    # get all supported libraries of the selected country
+    j = requests.get(f'{base}{country["libraryListId"]}/sign-in').json()
     l = []
     for item in j['tenants']:
         l.append(xbmcgui.ListItem(f'{item["displayCategory"]} - {item["displayName"]}'))
     i = xbmcgui.Dialog().select(lm4utils.getTranslation(30010), l)
+    lm4utils.log(f'[{__addonid__}] selected index for library: {i}')
+
+    if i == -1: # selection was canceled
+        return
 
     domain = j['tenants'][int(i)]['clients']['web']['domain']
     tenant = j['tenants'][int(i)]['id']
@@ -28,7 +65,7 @@ def pick():
     lm4utils.log(f'[{__addonid__}] selected library: {library}')
     lm4utils.log(f'[{__addonid__}] tenant id of selected library: {tenant}')
 
-# get information about the possible login providers of the selected library
+    # get information about the possible login providers of the selected library
     r = requests.get(f'{providerBase}{tenant}/sign-in')
     if r.text == '':
         lm4utils.displayMsg(lm4utils.getTranslation(30506), lm4utils.getTranslation(30507))
@@ -180,6 +217,7 @@ def pick():
         }
         lm4utils.log(f'[{__addonid__}] parsed token information: {json.dumps(j)}')
 
+    lm4utils.setSetting('country', country["code"])
     lm4utils.setSetting('domain', domain)
     lm4utils.setSetting('tenant', tenant)
     lm4utils.setSetting('library', library)

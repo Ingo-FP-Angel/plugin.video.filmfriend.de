@@ -79,12 +79,23 @@
 						<allowempty>true</allowempty>
 					</constraints>
 				</setting>
-				<setting type="string" label="30051" id="provider">
+				<setting type="string" label="30054" id="provider">
 					<level>3</level>
 					<default/>
 					<enable>false</enable>
 					<control type="edit" format="string">
-						<heading>30051</heading>
+						<heading>30054</heading>
+					</control>
+					<constraints>
+						<allowempty>true</allowempty>
+					</constraints>
+				</setting>
+				<setting type="string" label="30030" id="country">
+					<level>3</level>
+					<default/>
+					<enable>false</enable>
+					<control type="edit" format="string">
+						<heading>30030</heading>
 					</control>
 					<constraints>
 						<allowempty>true</allowempty>
