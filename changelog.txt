@@ -1,3 +1,7 @@
+v1.0.10
+- [feat] Add support for Austrian and Swiss libraries
+- [fix]  Fix label of provider setting
+
 v1.0.9
 - [feat] Automatically refresh an expired access_token
 
