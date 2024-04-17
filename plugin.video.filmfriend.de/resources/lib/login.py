@@ -74,30 +74,50 @@ def pick():
     j = r.json()
     lm4utils.log(f'[{__addonid__}] provider info of selected library: {j}')
 
-    if len(j['external']) > 0:
+    # provider types that are supported in order of preference
+    supportedProviderTypes = [
+        {'type': 'external', 'kind': 'OpenId'},
+        {'type': 'delegated', 'kind': None},
+        {'type': 'delegated', 'kind': 'Ip'},
+    ]
+
+    providerType = None
+    providerKind = None
+    for pType in supportedProviderTypes:
+        matchedProvider = next((pt for pt in j[pType['type']] if pt['providerKind'] == pType['kind']), None)
+        if matchedProvider is not None:
+            providerType = pType['type']
+            providerKind = pType['kind']
+            provider = matchedProvider['provider']
+            break
+
+    if providerType is None:
+        # no supported provider type was found -> show error
+        lm4utils.displayMsg(lm4utils.getTranslation(30506), lm4utils.getTranslation(30511))
+        return
+
+    if providerKind == 'OpenId':
         # ask for consent to grant access to the age rating during login
         ret = xbmcgui.Dialog().yesno(lm4utils.getTranslation(30514), lm4utils.getTranslation(30515),
                                      lm4utils.getTranslation(30516), lm4utils.getTranslation(30517))
         if not ret:
             return
 
-        providerType = 'external'
-    else:
-        providerType = 'delegated'
+    lm4utils.log(f'[{__addonid__}] provider type/kind to use for selected library: {providerType}/{providerKind}')
 
-    lm4utils.log(f'[{__addonid__}] provider type to use for selected library: {providerType}')
+    username = ''
+    password = ''
+    if not providerKind == "Ip":
+        username = xbmcgui.Dialog().input(lm4utils.getTranslation(30500))
+        if username == '':
+            lm4utils.displayMsg(lm4utils.getTranslation(30501), lm4utils.getTranslation(30502))
+            return
 
-    username = xbmcgui.Dialog().input(lm4utils.getTranslation(30500))
-    if username == '':
-        lm4utils.displayMsg(lm4utils.getTranslation(30501), lm4utils.getTranslation(30502))
-        return
+        password = xbmcgui.Dialog().input(lm4utils.getTranslation(30503))
+        if password == '':
+            lm4utils.displayMsg(lm4utils.getTranslation(30504), lm4utils.getTranslation(30505))
+            return
 
-    password = xbmcgui.Dialog().input(lm4utils.getTranslation(30503))
-    if password == '':
-        lm4utils.displayMsg(lm4utils.getTranslation(30504), lm4utils.getTranslation(30505))
-        return
-
-    provider = j[providerType][0]['provider']
     client_id = f'tenant-{tenant}-filmwerte-vod-frontend'
 
     if providerType == 'delegated':
@@ -107,6 +127,8 @@ def pick():
         if 'error' in j:
             if j['error'] == 'InvalidCredentials':
                 lm4utils.displayMsg(lm4utils.getTranslation(30506), lm4utils.getTranslation(30508))
+            elif j['error'] == 'Locked':
+                lm4utils.displayMsg(lm4utils.getTranslation(30506), lm4utils.getTranslation(30518))
             else:
                 lm4utils.displayMsg(lm4utils.getTranslation(30506), lm4utils.getTranslation(30507))
             return
