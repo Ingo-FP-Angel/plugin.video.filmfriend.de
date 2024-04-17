@@ -1,3 +1,7 @@
+v1.0.11
+- [feat] Add support for IP based login
+- [fix]  Show an error if a library only offers login methods not supported by this addon
+
 v1.0.10
 - [feat] Add support for Austrian and Swiss libraries
 - [fix]  Fix label of provider setting
