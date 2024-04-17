@@ -163,6 +163,10 @@ msgctxt "#30517"
 msgid "Agree"
 msgstr "Zustimmen"
 
+msgctxt "#30518"
+msgid "Your IP is not from an allowed network."
+msgstr "Ihre IP stammt nicht aus einem zulässigen Netzwerk. Wenn Ihre Bibliothek weitere Anmeldeverfahren anbietet, werden diese leider noch nicht unterstützt."
+
 msgctxt "#30600"
 msgid "Shows"
 msgstr "Serien"

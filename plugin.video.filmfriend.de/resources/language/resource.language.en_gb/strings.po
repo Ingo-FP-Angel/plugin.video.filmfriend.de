@@ -159,6 +159,10 @@ msgctxt "#30517"
 msgid "Agree"
 msgstr "Agree"
 
+msgctxt "#30518"
+msgid "Your IP is not from an allowed network."
+msgstr "Your IP is not from an allowed network. If your library offers other methods of authentication, they unfortunately not supported yet."
+
 msgctxt "#30600"
 msgid "Shows"
 msgstr "Shows"
