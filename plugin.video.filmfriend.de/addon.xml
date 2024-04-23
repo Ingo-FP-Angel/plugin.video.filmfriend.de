@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<addon id="plugin.video.filmfriend.de" name="Filmfriend.de (Kodinerds)" version="1.0.11" provider-name="Ingo-FP-Angel, sarbes">
+<addon id="plugin.video.filmfriend.de" name="Filmfriend.de (Kodinerds)" version="1.0.12-beta-1" provider-name="Ingo-FP-Angel, sarbes">
     <requires>
 		<import addon="xbmc.python" version="3.0.0"/>
 		<import addon="script.module.requests" version="2.19.1"/>
