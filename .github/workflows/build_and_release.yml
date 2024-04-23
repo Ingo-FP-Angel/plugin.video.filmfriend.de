@@ -46,4 +46,4 @@ jobs:
           curl -b cookiejar "https://repo.kodinerds.net/index.php?action=upload" -o result.html
           ACTION=$(grep '<input type="hidden" name="action"' result.html | tail -1 | cut -d '"' -f 6)
           curl -b cookiejar -H "Content-Type: multipart/form-data" -F upload_info=plugin.video.filmfriend.de-${{ steps.version.outputs.VERSION }}.zip -F "upload=@plugin.video.filmfriend.de-${{ steps.version.outputs.VERSION }}.zip;headers=\"Content-Type: application/zip\"" -F overwrite=overwrite -F "submit_btn=Upload" -F "action=${ACTION}" "https://repo.kodinerds.net/index.php" -o result.html
-          rm -f cookiejar
+          curl -b cookiejar "https://repo.kodinerds.net/index.php?action=logout" -o result.html
