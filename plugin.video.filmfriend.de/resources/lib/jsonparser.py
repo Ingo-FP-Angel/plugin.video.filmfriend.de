@@ -106,12 +106,12 @@ def parseSearch(params,content='videos'):
 	j = fetchJson(f'{base}/tenant-groups/fba2f8b5-6a3a-4da3-b555-21613a88d3ef/search{params}')
 	return parseResponse(j,content)
 
-def parseResponse(responseJson,content='videos'):
+def parseResponse(responseJson, content='videos'):
 	res = _emptyPage(content)
 	if responseJson is None or 'results' not in responseJson:
 		return res
+
 	for item in responseJson['results']:
-		result = item
 		if 'result' in item:
 			result = item['result']
 		else:
@@ -187,6 +187,11 @@ def parseResponse(responseJson,content='videos'):
 
 		else:
 			lm4utils.log(f'[{__addonid__}] Unsupported kind of media: {item["kind"]}')
+
+	if content == 'tvshows':
+		res['items'] = sorted(res['items'], key=lambda entry: entry['metadata']['season'])
+	elif content == 'episodes':
+		res['items'] = sorted(res['items'], key=lambda entry: entry['metadata']['episode'])
 
 	return res
 
