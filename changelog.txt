@@ -1,3 +1,6 @@
+v1.0.12
+- [fix] Fix sorting of seasons and episodes of a series
+
 v1.0.11
 - [feat] Add support for IP based login
 - [fix]  Show an error if a library only offers login methods not supported by this addon
