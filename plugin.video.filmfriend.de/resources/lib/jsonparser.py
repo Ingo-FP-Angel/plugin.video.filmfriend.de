@@ -295,6 +295,12 @@ def _getNewToken():
 	lm4utils.log(f'[{__addonid__}] token refresh formdata: {formdata}')
 	j = requests.post(tokenUrl, headers=headers, data=formdata).json()
 	lm4utils.log(f"[{__addonid__}] token refresh body: {json.dumps(j)}")
+
+	if 'error' in j:
+		lm4utils.log(f"[{__addonid__}] Could not fetch new access token. Refresh token likely expired.")
+		lm4utils.displayMsg(lm4utils.getTranslation(30506), lm4utils.getTranslation(30509))
+		return
+
 	lm4utils.setSetting('access_token', j['access_token'])
 	lm4utils.setSetting('refresh_token', j['refresh_token'])
 
