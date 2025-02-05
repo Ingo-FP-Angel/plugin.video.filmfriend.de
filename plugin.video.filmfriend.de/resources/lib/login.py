@@ -51,9 +51,13 @@ def pick():
     # get all supported libraries of the selected country
     j = requests.get(f'{base}{country["libraryListId"]}/sign-in').json()
     l = []
-    for item in j['tenants']:
+    cidx = -1
+    for idx, item in enumerate(j['tenants']):
         l.append(xbmcgui.ListItem(f'{item["displayCategory"]} - {item["displayName"]}'))
-    i = xbmcgui.Dialog().select(lm4utils.getTranslation(30010), l)
+        if item["displayName"] == previousLibrary:
+            cidx = idx
+            
+    i = xbmcgui.Dialog().select(lm4utils.getTranslation(30010), l, preselect = cidx)
     lm4utils.log(f'[{__addonid__}] selected index for library: {i}')
 
     if i == -1: # selection was canceled
@@ -105,15 +109,15 @@ def pick():
 
     lm4utils.log(f'[{__addonid__}] provider type/kind to use for selected library: {providerType}/{providerKind}')
 
-    username = ''
-    password = ''
+    username = lm4utils.getSetting('username')
+    password = lm4utils.getSetting('password')
     if not providerKind == "Ip":
-        username = xbmcgui.Dialog().input(lm4utils.getTranslation(30500))
+        username = xbmcgui.Dialog().input(lm4utils.getTranslation(30500), defaultt=username)
         if username == '':
             lm4utils.displayMsg(lm4utils.getTranslation(30501), lm4utils.getTranslation(30502))
             return
 
-        password = xbmcgui.Dialog().input(lm4utils.getTranslation(30503))
+        password = xbmcgui.Dialog().input(lm4utils.getTranslation(30503), defaultt=password)
         if password == '':
             lm4utils.displayMsg(lm4utils.getTranslation(30504), lm4utils.getTranslation(30505))
             return
