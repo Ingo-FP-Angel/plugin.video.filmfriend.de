@@ -266,11 +266,15 @@ def _checkTokenExpired():
 		# not using "pyjwt" as it uses "cryptography" and some versions of that module make the addon fail to load
 		# with "PyO3 modules may only be initialized once per interpreter process"
 		# so yes, were not properly validating the token, just getting the expiration value
-		tokenBody = base64.decode(tokenString.split(".")[1])
+		payload = tokenString.split(".")[1]
+		payloadWithPadding = f"{payload}{'=' * (4 - len(payload) % 4)}"
+		tokenBody = json.loads(base64.b64decode(payloadWithPadding))
 		expiry = tokenBody['exp']
+		lm4utils.log(f'[{__addonid__}] Access token expires at: {time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(expiry))}')
 		if expiry <= time.time():
 			isExpired = True
-	except:
+	except Exception as e:
+		lm4utils.log(f'[{__addonid__}] Access token parsing failed: {e}')
 		isExpired = True
 	
 	if isExpired:
@@ -307,6 +311,12 @@ def _getNewToken():
 	lm4utils.log(f'[{__addonid__}] token refresh formdata: {formdata}')
 	j = requests.post(tokenUrl, headers=headers, data=formdata).json()
 	lm4utils.log(f"[{__addonid__}] token refresh body: {json.dumps(j)}")
+
+	if 'error' in j:
+		lm4utils.log(f"[{__addonid__}] Could not fetch new access token. Refresh token likely expired.")
+		lm4utils.displayMsg(lm4utils.getTranslation(30506), lm4utils.getTranslation(30509))
+		return
+
 	lm4utils.setSetting('access_token', j['access_token'])
 	lm4utils.setSetting('refresh_token', j['refresh_token'])
 

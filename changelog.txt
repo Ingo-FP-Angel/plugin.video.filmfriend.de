@@ -1,3 +1,6 @@
+v1.0.13
+- [fix] Tell user to login again manually when automatic token refresh failed instead of showing generic error
+
 v1.0.12
 - [fix] Fix sorting of seasons and episodes of a series
 
