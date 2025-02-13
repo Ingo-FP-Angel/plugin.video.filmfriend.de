@@ -183,6 +183,10 @@ msgctxt "#30604"
 msgid "Video unavailable"
 msgstr "The video is not available (anymore)"
 
+msgctxt "#30605"
+msgid "Genres"
+msgstr "Genres"
+
 ### translations below are imported from "script.module.libmediathek4" that's currently broken
 msgctxt "#32000"
 msgid "This month"
