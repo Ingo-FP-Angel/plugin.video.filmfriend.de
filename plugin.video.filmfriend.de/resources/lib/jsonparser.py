@@ -92,13 +92,9 @@ def parseMain():
 def parseGenres():
 	# get list of genres
 	tenant = lm4utils.getSetting("tenant")
-	response_genres = requests.get(f'https://api.tenant.frontend.vod.filmwerte.de/v11/{tenant}/genres')
-	genre_names = []
-	genre_ids = []
-	if response_genres.status_code == 200:
-		genres = response_genres.json()
-		genre_names = [d["name"] for d in genres]
-		genre_ids = [d["id"] for d in genres]
+	genres = fetchJson(f'https://api.tenant.frontend.vod.filmwerte.de/v11/{tenant}/genres')
+	genre_names = [d["name"] for d in genres]
+	genre_ids = [d["id"] for d in genres]
 	return genre_names, genre_ids
 
 def parseWatchList(params,content='videos'):
