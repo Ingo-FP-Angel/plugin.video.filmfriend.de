@@ -1,3 +1,8 @@
+v1.0.14
+- [feat] Add menu entry to browse videos by genre (by rantan-plan)
+- [feat] Preselect library and credentials during (re-)login if present (by rantan-plan)
+- [fix]  Correct code to check for token expiry, i.e. token refresh now only happens when really needed
+
 v1.0.13
 - [fix] Tell user to login again manually when automatic token refresh failed instead of showing generic error
 
