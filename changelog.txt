@@ -1,3 +1,9 @@
+v1.1.0
+- [refactor] Change the way the addon authenticates for certain libraries in order to support the Hamburg library again.
+             This might lead users to log in again once manually because it also affects the way the automatic refresh
+             of the access token works.
+- [fix]      The refactoring above also adds support for Stadtbibliothek Darmstadt - and likely others.
+
 v1.0.15
 - [fix] Fix a crash when showing all available series from the main menu
 
