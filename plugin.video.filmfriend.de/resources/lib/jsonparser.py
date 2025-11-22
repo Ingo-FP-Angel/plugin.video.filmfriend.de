@@ -297,17 +297,38 @@ def _getNewToken():
 		lm4utils.log(f"[{__addonid__}] Cannot fetch new access token. Provider value is missing.")
 		return
 
-	formdata = {
-		'client_id': f'tenant-{lm4utils.getSetting("tenant")}-filmwerte-vod-frontend',
-		'provider': provider,
-		'refresh_token': refresh_token,
-		'grant_type': 'refresh_token',
-		'scope': 'filmwerte-vod-api offline_access'
-	}
+	# saving the provider_type in the addon settings was introduced in v1.1.0
+	# if last login was done in an earlier version the provider_type will be empty
+	# in this case the user will have to manually login again
+	# this check can be removed in a later version
+	providerType = lm4utils.getSetting("provider_type")
+
+	if providerType is None or providerType == '':
+		lm4utils.log(f"[{__addonid__}] Cannot fetch new access token. Provider type value is missing.")
+		return
+
+	if providerType == 'delegated':
+		tokenUrl = 'https://api.tenant.frontend.vod.filmwerte.de/connect/token'
+		formdata = {
+			'client_id': f'filmwerte-vod-frontend',
+			'provider': provider,
+			'refresh_token': refresh_token,
+			'grant_type': 'refresh_token',
+			'scope': 'offline_access'
+		}
+	else:
+		tokenUrl = 'https://api.vod.filmwerte.de/connect/token'
+		formdata = {
+			'client_id': f'tenant-{lm4utils.getSetting("tenant")}-filmwerte-vod-frontend',
+			'provider': provider,
+			'refresh_token': refresh_token,
+			'grant_type': 'refresh_token',
+			'scope': 'filmwerte-vod-api offline_access'
+		}
+
 	headers = {
 		"Content-Type": 'application/x-www-form-urlencoded',
 	}
-	tokenUrl = 'https://api.vod.filmwerte.de/connect/token'
 	lm4utils.log(f'[{__addonid__}] token refresh POST: {tokenUrl}')
 	lm4utils.log(f'[{__addonid__}] token refresh formdata: {formdata}')
 	j = requests.post(tokenUrl, headers=headers, data=formdata).json()

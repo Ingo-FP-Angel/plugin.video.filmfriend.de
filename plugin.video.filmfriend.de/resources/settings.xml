@@ -90,6 +90,17 @@
 						<allowempty>true</allowempty>
 					</constraints>
 				</setting>
+				<setting type="string" label="30055" id="provider_type">
+					<level>3</level>
+					<default/>
+					<enable>false</enable>
+					<control type="edit" format="string">
+						<heading>30055</heading>
+					</control>
+					<constraints>
+						<allowempty>true</allowempty>
+					</constraints>
+				</setting>
 				<setting type="string" label="30030" id="country">
 					<level>3</level>
 					<default/>

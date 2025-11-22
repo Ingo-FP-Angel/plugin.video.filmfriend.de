@@ -91,6 +91,10 @@ msgctxt "#30054"
 msgid "Provider"
 msgstr "Provider"
 
+msgctxt "#30055"
+msgid "Provider type"
+msgstr "Provider-Typ"
+
 msgctxt "#30500"
 msgid "Username"
 msgstr "Nutzername"

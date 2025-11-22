@@ -122,12 +122,19 @@ def pick():
             lm4utils.displayMsg(lm4utils.getTranslation(30504), lm4utils.getTranslation(30505))
             return
 
-    client_id = f'tenant-{tenant}-filmwerte-vod-frontend'
-
     if providerType == 'delegated':
-        files = {'client_id': (None, client_id), 'provider': (None, provider), 'username': (None, username),
-                 'password': (None, password), 'scope': (None, 'filmwerte-vod-api offline_access')}
-        j = requests.post('https://api.vod.filmwerte.de/connect/authorize-external', files=files).json()
+        # starting in v1.1.0 we switched from tenant specific client to general UI client
+        # previous way stopped working after the Hamburg library switched their system and authentication
+        client_id = f'filmwerte-vod-frontend'
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36',
+            "Content-Type": 'application/x-www-form-urlencoded',
+        }
+        usernameEncoded = urllib.parse.quote_plus(username)
+        passwordEncoded = urllib.parse.quote_plus(password)
+        formdata = f'client_id={client_id}&username={usernameEncoded}&password={passwordEncoded}&scope=offline_access&grant_type=password&provider={provider}'
+
+        j = requests.post('https://api.tenant.frontend.vod.filmwerte.de/connect/token', headers=headers, data=formdata).json()
         if 'error' in j:
             if j['error'] == 'InvalidCredentials':
                 lm4utils.displayMsg(lm4utils.getTranslation(30506), lm4utils.getTranslation(30508))
