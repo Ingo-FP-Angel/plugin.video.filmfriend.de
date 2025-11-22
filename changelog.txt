@@ -1,3 +1,6 @@
+v1.0.15
+- [fix] Fix a crash when showing all available series from the main menu
+
 v1.0.14
 - [feat] Add menu entry to browse videos by genre (by rantan-plan)
 - [feat] Preselect library and credentials during (re-)login if present (by rantan-plan)
