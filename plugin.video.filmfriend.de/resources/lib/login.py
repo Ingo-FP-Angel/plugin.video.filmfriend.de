@@ -8,6 +8,16 @@ import resources.lib.external.libmediathek4utils as lm4utils
 import xbmcaddon
 import xbmcgui
 
+### Uncomment the following lines if you want to debug HTTP traffic
+#import logging
+#from http.client import HTTPConnection
+#HTTPConnection.debuglevel = 1
+#logging.basicConfig()
+#logging.getLogger().setLevel(logging.DEBUG)
+#requests_log = logging.getLogger("requests.packages.urllib3")
+#requests_log.setLevel(logging.DEBUG)
+#requests_log.propagate = True
+
 __addon__ = xbmcaddon.Addon()
 __addonid__ = __addon__.getAddonInfo('id')
 
