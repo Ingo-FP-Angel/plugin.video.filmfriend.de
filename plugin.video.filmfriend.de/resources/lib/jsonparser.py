@@ -201,7 +201,8 @@ def parseResponse(responseJson, content='videos'):
 			lm4utils.log(f'[{__addonid__}] Unsupported kind of media: {item["kind"]}')
 
 	if content == 'tvshows':
-		res['items'] = sorted(res['items'], key=lambda entry: entry['metadata']['season'])
+		# sort by name unless we're showing the seasons of a single tv show, then sort by season number
+		res['items'] = sorted(res['items'], key=lambda entry: entry['metadata']['season'] if entry['type'] == 'season' else entry['metadata']['name'])
 	elif content == 'episodes':
 		res['items'] = sorted(res['items'], key=lambda entry: entry['metadata']['episode'])
 
