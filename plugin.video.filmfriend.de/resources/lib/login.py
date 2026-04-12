@@ -4,9 +4,10 @@ import re
 import urllib.parse
 
 import requests
-import resources.lib.external.libmediathek4utils as lm4utils
 import xbmcaddon
 import xbmcgui
+
+import resources.lib.external.libmediathek4utils as lm4utils
 
 ### Uncomment the following lines if you want to debug HTTP traffic
 #import logging
@@ -266,5 +267,6 @@ def pick():
     lm4utils.setSetting('library', library)
     lm4utils.setSetting('username', username)
     lm4utils.setSetting('provider', provider)
+    lm4utils.setSetting('provider_type', providerType)
     lm4utils.setSetting('access_token', j['access_token'])
     lm4utils.setSetting('refresh_token', j['refresh_token'])
