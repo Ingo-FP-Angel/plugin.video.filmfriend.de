@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 import re
 import urllib.parse
 
@@ -24,6 +23,8 @@ __addonid__ = __addon__.getAddonInfo('id')
 
 base = 'https://api.tenant-group.frontend.vod.filmwerte.de/v7/'
 providerBase = 'https://api.tenant.frontend.vod.filmwerte.de/v11/'
+apiBase = 'https://api.tenant.frontend.vod.filmwerte.de'
+client = 'filmwerte-vod-frontend'
 
 countries = [
     { "code": "at", "displayName": lm4utils.getTranslation(30032), "libraryListId": "8bd3757f-bb3f-4ffe-9543-3424497ef47d" },
@@ -133,61 +134,63 @@ def pick():
             lm4utils.displayMsg(lm4utils.getTranslation(30504), lm4utils.getTranslation(30505))
             return
 
+    usernameEncoded = urllib.parse.quote_plus(username)
+    passwordEncoded = urllib.parse.quote_plus(password)
+
     if providerType == 'delegated':
         # starting in v1.1.0 we switched from tenant specific client to general UI client
         # previous way stopped working after the Hamburg library switched their system and authentication
-        client_id = f'filmwerte-vod-frontend'
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36',
             "Content-Type": 'application/x-www-form-urlencoded',
         }
-        usernameEncoded = urllib.parse.quote_plus(username)
-        passwordEncoded = urllib.parse.quote_plus(password)
-        formdata = f'client_id={client_id}&username={usernameEncoded}&password={passwordEncoded}&scope=offline_access&grant_type=password&provider={provider}'
+        formdata = f'client_id={client}&username={usernameEncoded}&password={passwordEncoded}&scope=offline_access&grant_type=password&provider={provider}'
 
-        j = requests.post('https://api.tenant.frontend.vod.filmwerte.de/connect/token', headers=headers, data=formdata).json()
-        if 'error' in j:
-            if j['error'] == 'InvalidCredentials':
-                lm4utils.displayMsg(lm4utils.getTranslation(30506), lm4utils.getTranslation(30508))
-            elif j['error'] == 'Locked':
-                lm4utils.displayMsg(lm4utils.getTranslation(30506), lm4utils.getTranslation(30518))
-            else:
-                lm4utils.displayMsg(lm4utils.getTranslation(30506), lm4utils.getTranslation(30507))
-            return
+        j = requests.post(f'{apiBase}/connect/token', headers=headers, data=formdata).json()
     else:
         session = requests.session()
-        # initialize external login, follow redirects to land on username/password page
-        authExternalUrl = f'https://api.vod.filmwerte.de/connect/authorize-external?clientId=tenant-{tenant}-filmwerte-vod-frontend&provider={provider}&redirectUri=https://{domain}/de/sign-in/completed'
+
+        # VISIT API SIGN-IN PAGE
+        authExternalUrl = f'{apiBase}/connect/authorize?client_id={client}&response_type=code&scope=offline_access&provider={provider}&redirect_uri=https://{domain}/de/sign-in/completed'
         headers = {
             'Accept-Language': 'de, en;q=0.8, *;q=0.5'
         }
         lm4utils.log(f'[{__addonid__}] authorize-external GET: {authExternalUrl}')
         response = session.get(authExternalUrl, headers=headers)
+        loginFormUrl = response.url
         lm4utils.log(f'[{__addonid__}] authorize-external status: {response.status_code}')
         lm4utils.log(f'[{__addonid__}] authorize-external headers: {response.headers}')
         lm4utils.log(f'[{__addonid__}] authorize-external body: {response.text}')
+        lm4utils.log(f'[{__addonid__}] authorize-external redirect to: {loginFormUrl}')
 
-        # we should have been redirected to something like https://www.voebb.de/oidcp/authorize?{some query string}
-        index = response.history[0].headers['Location'].index('?')
-        baseUrl = response.history[0].headers['Location'][0:index]
-        baseUrl = baseUrl.replace('/oidcp/authorize', '')
+        # LOGIN FORM
+        parsedUrl = urllib.parse.urlparse(loginFormUrl)
+        baseUrl = f'{parsedUrl.scheme}://{parsedUrl.hostname}'
+        loginBaseUrl = f'{baseUrl}{parsedUrl.path}'
+        lm4utils.log(f'[{__addonid__}] loginBaseUrl: {loginBaseUrl}')
 
-        # post username and password, will land us on intermediate page to confirm access to age rating
-        usernameEncoded = urllib.parse.quote_plus(username)
-        passwordEncoded = urllib.parse.quote_plus(password)
+        # Find form action in <form action="MATCH" ...>
+        match = re.search(r'<form[^>]*action="([^"]+)"', response.text)
+        if match is None:
+            lm4utils.log(f'[{__addonid__}] could not find login form action in response body')
+            lm4utils.displayMsg(lm4utils.getTranslation(30506), lm4utils.getTranslation(30507))
+            return
+
+        action_value = match.group(1)
+        loginSubmitUrl = urllib.parse.urljoin(loginBaseUrl, action_value)
+
         formdata = f'L%23AUSW={usernameEncoded}&LPASSW={passwordEncoded}&LLOGIN=Anmelden'
-        logincheckUrl = baseUrl + '/oidcp/logincheck'
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36',
             'Upgrade-Insecure-Requests': '1',
             'Origin': baseUrl,
-            'Referer': baseUrl + '/oidcp/authorize',
+            'Referer': loginFormUrl,
             "Content-Type": 'application/x-www-form-urlencoded',
             "Accept": 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
             'Accept-Language': 'de, en;q=0.8, *;q=0.5',
         }
-        lm4utils.log(f'[{__addonid__}] user/pass submit POST: {logincheckUrl}')
-        response = session.post(logincheckUrl, headers=headers, data=formdata)
+        lm4utils.log(f'[{__addonid__}] user/pass submit POST: {loginSubmitUrl}')
+        response = session.post(loginSubmitUrl, headers=headers, data=formdata)
         lm4utils.log(f'[{__addonid__}] user/pass submit status: {response.status_code}')
         lm4utils.log(f'[{__addonid__}] user/pass submit headers: {response.headers}')
         lm4utils.log(f'[{__addonid__}] user/pass submit body: {response.text}')
@@ -196,70 +199,77 @@ def pick():
         ### TODO finally stop if page after user/pass submission still contains e.g. the LPASSW form field
         ### TODO Error message is in <div class="hinweis fehler">...</div>
 
-        # post agreement to transfer age rating, not auto following redirects as that would skip over token info
+        # CONSENT FORM
+        consentFormUrl = response.url
+        parsedUrl = urllib.parse.urlparse(consentFormUrl)
+        consentBaseUrl = f'{parsedUrl.scheme}://{parsedUrl.hostname}{parsedUrl.path}'
+        lm4utils.log(f'[{__addonid__}] consentBaseUrl: {consentBaseUrl}')
+
+        # Find form action in <form action="MATCH" ...>
+        match = re.search(r'<form[^>]*action="([^"]+)"', response.text)
+        if match is None:
+            lm4utils.log(f'[{__addonid__}] could not find consent form action in response body')
+            lm4utils.displayMsg(lm4utils.getTranslation(30506), lm4utils.getTranslation(30507))
+            return
+
+        action_value = match.group(1)
+        consentUrl = urllib.parse.urljoin(consentBaseUrl, action_value)
+
         formdata = 'CLOGIN=Zustimmen+und+fortfahren'
-        consentUrl = baseUrl + '/oidcp/consent'
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36',
             'Upgrade-Insecure-Requests': '1',
             'Origin': baseUrl,
-            'Referer': logincheckUrl,
+            'Referer': loginSubmitUrl,
             "Content-Type": 'application/x-www-form-urlencoded',
             "Accept": 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
             'Accept-Language': 'de, en;q=0.8, *;q=0.5',
         }
-        lm4utils.log(f'[{__addonid__}] consent submit POST: {consentUrl}')
-        lm4utils.log(f'[{__addonid__}] consent submit formdata: {formdata}')
-        response = session.post(consentUrl, headers=headers, data=formdata, allow_redirects=False)
-        lm4utils.log(f'[{__addonid__}] consent submit status: {response.status_code}')
-        lm4utils.log(f'[{__addonid__}] consent submit headers: {response.headers}')
-        lm4utils.log(f'[{__addonid__}] consent submit body: {response.text}')
+        lm4utils.log(f'[{__addonid__}] consent POST: {consentUrl}')
+        response = session.post(consentUrl, headers=headers, data=formdata)
+        lm4utils.log(f'[{__addonid__}] consent status: {response.status_code}')
+        lm4utils.log(f'[{__addonid__}] consent headers: {response.headers}')
+        lm4utils.log(f'[{__addonid__}] consent body: {response.text}')
 
-        # should be https://api.vod.filmwerte.de/authorize/callback-{provider id}?code={some auth code}?state={some state}
-        firstRedirectUrl = response.headers['Location']
+        # GET BEARER TOKENS
+        parsedUrl = urllib.parse.urlparse(response.url)
+        completedUrl = f'{parsedUrl.scheme}://{parsedUrl.hostname}{parsedUrl.path}'
+        completedUrlEncoded = urllib.parse.quote(completedUrl)
+
+        # Extract 'code' from completion url query params
+        code = urllib.parse.parse_qs(parsedUrl.query).get('code', [None])[0]
+        if code is None:
+            lm4utils.log(f'[{__addonid__}] no auth code found in final redirect: {response.url}')
+            lm4utils.displayMsg(lm4utils.getTranslation(30506), lm4utils.getTranslation(30507))
+            return
+
+        tokenUrl = f'{apiBase}/connect/token'
+        formdata = f'client_id={client}&grant_type=authorization_code&code={code}&redirect_uri={completedUrlEncoded}'
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36',
             'Upgrade-Insecure-Requests': '1',
-            'Referer': logincheckUrl,
+            'Origin': baseUrl,
+            'Referer': loginFormUrl,
+            "Content-Type": 'application/x-www-form-urlencoded',
             "Accept": 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
             'Accept-Language': 'de, en;q=0.8, *;q=0.5',
         }
-        lm4utils.log(f'[{__addonid__}] first redirect GET: {firstRedirectUrl}')
-        response = session.get(firstRedirectUrl, headers=headers, allow_redirects=False)
-        lm4utils.log(f'[{__addonid__}] first redirect status: {response.status_code}')
-        lm4utils.log(f'[{__addonid__}] first redirect headers: {response.headers}')
-        lm4utils.log(f'[{__addonid__}] first redirect body: {response.text}')
+        lm4utils.log(f'[{__addonid__}] token POST: {tokenUrl}')
+        response = requests.post(tokenUrl, headers=headers, data=formdata)
+        lm4utils.log(f'[{__addonid__}] token status: {response.status_code}')
+        lm4utils.log(f'[{__addonid__}] token headers: {response.headers}')
+        # not logging the response.text here as this would leak the access token
+        j = response.json()
 
-        # should be https://api.vod.filmwerte.de/connect/authorize-callback
-        secondRedirectUrl = response.headers['Location']
-        if not secondRedirectUrl.startswith("https://"):
-            secondRedirectUrl = 'https://api.vod.filmwerte.de' + secondRedirectUrl
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36',
-            'Upgrade-Insecure-Requests': '1',
-            'Referer': logincheckUrl,
-            "Accept": 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-            'Accept-Language': 'de, en;q=0.8, *;q=0.5',
-        }
-        lm4utils.log(f'[{__addonid__}] second redirect GET: {secondRedirectUrl}')
-        response = session.get(secondRedirectUrl, headers=headers, allow_redirects=False)
-        lm4utils.log(f'[{__addonid__}] second redirect status: {response.status_code}')
-        lm4utils.log(f'[{__addonid__}] second redirect headers: {response.headers}')
-        lm4utils.log(f'[{__addonid__}] second redirect body: {response.text}')
-
-        # should be https://{domain}/de/sign-in/completed#{token information exchanged from auth code}
-        # no need to follow, just parse the URL fragments
-        thirdRedirectUrl = response.headers["Location"]
-        lm4utils.log(f'[{__addonid__}] third redirect GET: {thirdRedirectUrl}')
-        parsedToken = re.search(r".*access_token=(.*)&token_type=(.*)&expires_in=(.*)&refresh_token=(.*)",
-                                thirdRedirectUrl)
-        j = {
-            "access_token": parsedToken.group(1),
-            "token_type": parsedToken.group(2),
-            "expires_in": parsedToken.group(3),
-            "refresh_token": parsedToken.group(4),
-        }
-        lm4utils.log(f'[{__addonid__}] parsed token information: {json.dumps(j)}')
+    # common handling of the token response
+    if 'error' in j:
+        if j['error'] == 'InvalidCredentials':
+            lm4utils.displayMsg(lm4utils.getTranslation(30506), lm4utils.getTranslation(30508))
+        elif j['error'] == 'Locked':
+            lm4utils.displayMsg(lm4utils.getTranslation(30506), lm4utils.getTranslation(30518))
+        else:
+            lm4utils.displayMsg(lm4utils.getTranslation(30506), lm4utils.getTranslation(30507))
+        return
 
     lm4utils.setSetting('country', country["code"])
     lm4utils.setSetting('domain', domain)

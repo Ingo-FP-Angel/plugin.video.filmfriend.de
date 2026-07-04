@@ -4,9 +4,10 @@ import json
 import time
 
 import requests
-import resources.lib.external.libmediathek4utils as lm4utils
 import xbmcaddon
 import xbmcgui
+
+import resources.lib.external.libmediathek4utils as lm4utils
 
 __addon__ = xbmcaddon.Addon()
 __addonid__ = __addon__.getAddonInfo('id')
@@ -307,25 +308,14 @@ def _getNewToken():
 		lm4utils.log(f"[{__addonid__}] Cannot fetch new access token. Provider type value is missing.")
 		return
 
-	if providerType == 'delegated':
-		tokenUrl = 'https://api.tenant.frontend.vod.filmwerte.de/connect/token'
-		formdata = {
-			'client_id': f'filmwerte-vod-frontend',
-			'provider': provider,
-			'refresh_token': refresh_token,
-			'grant_type': 'refresh_token',
-			'scope': 'offline_access'
-		}
-	else:
-		tokenUrl = 'https://api.vod.filmwerte.de/connect/token'
-		formdata = {
-			'client_id': f'tenant-{lm4utils.getSetting("tenant")}-filmwerte-vod-frontend',
-			'provider': provider,
-			'refresh_token': refresh_token,
-			'grant_type': 'refresh_token',
-			'scope': 'filmwerte-vod-api offline_access'
-		}
-
+	tokenUrl = 'https://api.tenant.frontend.vod.filmwerte.de/connect/token'
+	formdata = {
+		'client_id': f'filmwerte-vod-frontend',
+		'provider': provider,
+		'refresh_token': refresh_token,
+		'grant_type': 'refresh_token',
+		'scope': 'offline_access'
+	}
 	headers = {
 		"Content-Type": 'application/x-www-form-urlencoded',
 	}
