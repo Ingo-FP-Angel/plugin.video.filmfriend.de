@@ -16,7 +16,7 @@
         <source>https://github.com/Ingo-FP-Angel/plugin.video.filmfriend.de</source>
         <news><![CDATA[
 v1.2.0 (2026-07-04)
-- Change the way the addon authenticates for certain libraries in order to support the Berlin and Stuttgart libraries again.
+- Change the way the addon authenticates for certain libraries in order to support the Berlin and Stuttgart libraries again (by H3rby7).
 
 v1.1.1 (2026-04-12)
 - Fix issue refreshing an expired access token that was introduced in v1.1.0.

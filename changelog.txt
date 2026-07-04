@@ -1,5 +1,5 @@
 v1.2.0
-- [refactor] Change the way the addon authenticates for certain libraries in order to support the Berlin and Stuttgart libraries again.
+- [refactor] Change the way the addon authenticates for certain libraries in order to support the Berlin and Stuttgart libraries again (by H3rby7).
              This might lead users to log in again once manually because it also affects the way the automatic refresh
              of the access token works.
 
