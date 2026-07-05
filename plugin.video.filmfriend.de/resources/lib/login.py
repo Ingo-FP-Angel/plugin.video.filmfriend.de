@@ -26,6 +26,13 @@ providerBase = 'https://api.tenant.frontend.vod.filmwerte.de/v11/'
 apiBase = 'https://api.tenant.frontend.vod.filmwerte.de'
 client = 'filmwerte-vod-frontend'
 
+commonHeaders = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36',
+    'Upgrade-Insecure-Requests': '1',
+    "Accept": 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+    'Accept-Language': 'de, en;q=0.8, *;q=0.5',
+}
+
 countries = [
     { "code": "at", "displayName": lm4utils.getTranslation(30032), "libraryListId": "8bd3757f-bb3f-4ffe-9543-3424497ef47d" },
     { "code": "de", "displayName": lm4utils.getTranslation(30033), "libraryListId": "fba2f8b5-6a3a-4da3-b555-21613a88d3ef" },
@@ -141,7 +148,7 @@ def pick():
         # starting in v1.1.0 we switched from tenant specific client to general UI client
         # previous way stopped working after the Hamburg library switched their system and authentication
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36',
+            **commonHeaders,
             "Content-Type": 'application/x-www-form-urlencoded',
         }
         formdata = f'client_id={client}&username={usernameEncoded}&password={passwordEncoded}&scope=offline_access&grant_type=password&provider={provider}'
@@ -152,11 +159,9 @@ def pick():
 
         # VISIT API SIGN-IN PAGE
         authExternalUrl = f'{apiBase}/connect/authorize?client_id={client}&response_type=code&scope=offline_access&provider={provider}&redirect_uri=https://{domain}/de/sign-in/completed'
-        headers = {
-            'Accept-Language': 'de, en;q=0.8, *;q=0.5'
-        }
+        headers = commonHeaders
         lm4utils.log(f'[{__addonid__}] authorize-external GET: {authExternalUrl}')
-        response = session.get(authExternalUrl, headers=headers)
+        response = session.get(authExternalUrl, headers=headers, allow_redirects=True)
         loginFormUrl = response.url
         lm4utils.log(f'[{__addonid__}] authorize-external status: {response.status_code}')
         lm4utils.log(f'[{__addonid__}] authorize-external headers: {response.headers}')
@@ -181,13 +186,10 @@ def pick():
 
         formdata = f'L%23AUSW={usernameEncoded}&LPASSW={passwordEncoded}&LLOGIN=Anmelden'
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36',
-            'Upgrade-Insecure-Requests': '1',
+            **commonHeaders,
+            "Content-Type": 'application/x-www-form-urlencoded',
             'Origin': baseUrl,
             'Referer': loginFormUrl,
-            "Content-Type": 'application/x-www-form-urlencoded',
-            "Accept": 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-            'Accept-Language': 'de, en;q=0.8, *;q=0.5',
         }
         lm4utils.log(f'[{__addonid__}] user/pass submit POST: {loginSubmitUrl}')
         response = session.post(loginSubmitUrl, headers=headers, data=formdata)
@@ -217,13 +219,10 @@ def pick():
 
         formdata = 'CLOGIN=Zustimmen+und+fortfahren'
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36',
-            'Upgrade-Insecure-Requests': '1',
+            **commonHeaders,
+            "Content-Type": 'application/x-www-form-urlencoded',
             'Origin': baseUrl,
             'Referer': loginSubmitUrl,
-            "Content-Type": 'application/x-www-form-urlencoded',
-            "Accept": 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-            'Accept-Language': 'de, en;q=0.8, *;q=0.5',
         }
         lm4utils.log(f'[{__addonid__}] consent POST: {consentUrl}')
         response = session.post(consentUrl, headers=headers, data=formdata)
@@ -246,13 +245,10 @@ def pick():
         tokenUrl = f'{apiBase}/connect/token'
         formdata = f'client_id={client}&grant_type=authorization_code&code={code}&redirect_uri={completedUrlEncoded}'
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36',
-            'Upgrade-Insecure-Requests': '1',
+            **commonHeaders,
+            "Content-Type": 'application/x-www-form-urlencoded',
             'Origin': baseUrl,
             'Referer': loginFormUrl,
-            "Content-Type": 'application/x-www-form-urlencoded',
-            "Accept": 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-            'Accept-Language': 'de, en;q=0.8, *;q=0.5',
         }
         lm4utils.log(f'[{__addonid__}] token POST: {tokenUrl}')
         response = requests.post(tokenUrl, headers=headers, data=formdata)
