@@ -165,7 +165,19 @@ msgstr "Agree"
 
 msgctxt "#30518"
 msgid "Your IP is not from an allowed network."
-msgstr "Your IP is not from an allowed network. If your library offers other methods of authentication, they unfortunately not supported yet."
+msgstr "Your IP is not from an allowed network. If your library offers other methods of authentication, they are unfortunately not supported yet."
+
+msgctxt "#30520"
+msgid "6-digit authenticator code"
+msgstr "SWITCH edu-ID: 6-digit authenticator code"
+
+msgctxt "#30521"
+msgid "authenticator code is empty"
+msgstr "Authenticator code is empty"
+
+msgctxt "#30522"
+msgid "The 6-digit authenticator code field mustn't be empty"
+msgstr "Please enter the 6-digit authenticator code."
 
 msgctxt "#30600"
 msgid "Shows"

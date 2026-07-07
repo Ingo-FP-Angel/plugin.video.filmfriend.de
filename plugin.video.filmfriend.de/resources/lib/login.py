@@ -7,6 +7,7 @@ import xbmcaddon
 import xbmcgui
 
 import resources.lib.external.libmediathek4utils as lm4utils
+from resources.lib.login_eduid import signInEduId
 
 ### Uncomment the following lines if you want to debug HTTP traffic
 #import logging
@@ -168,104 +169,112 @@ def pick():
         lm4utils.log(f'[{__addonid__}] authorize-external body: {response.text}')
         lm4utils.log(f'[{__addonid__}] authorize-external redirect to: {loginFormUrl}')
 
-        # LOGIN FORM
-        parsedUrl = urllib.parse.urlparse(loginFormUrl)
-        baseUrl = f'{parsedUrl.scheme}://{parsedUrl.hostname}'
-        loginBaseUrl = f'{baseUrl}{parsedUrl.path}'
-        lm4utils.log(f'[{__addonid__}] loginBaseUrl: {loginBaseUrl}')
-
-        # Find form action in <form action="MATCH" ...>
-        match = re.search(r'<form[^>]*action="([^"]+)"', response.text)
-        if match is None:
-            lm4utils.log(f'[{__addonid__}] could not find login form action in response body')
-            lm4utils.displayMsg(lm4utils.getTranslation(30506), lm4utils.getTranslation(30507))
-            return
-
-        action_value = match.group(1)
-        loginSubmitUrl = urllib.parse.urljoin(loginBaseUrl, action_value)
-
-        formdata = f'L%23AUSW={usernameEncoded}&LPASSW={passwordEncoded}&LLOGIN=Anmelden'
-        headers = {
-            **commonHeaders,
-            "Content-Type": 'application/x-www-form-urlencoded',
-            'Origin': baseUrl,
-            'Referer': loginFormUrl,
-        }
-        lm4utils.log(f'[{__addonid__}] user/pass submit POST: {loginSubmitUrl}')
-        response = session.post(loginSubmitUrl, headers=headers, data=formdata)
-        lm4utils.log(f'[{__addonid__}] user/pass submit status: {response.status_code}')
-        lm4utils.log(f'[{__addonid__}] user/pass submit headers: {response.headers}')
-        lm4utils.log(f'[{__addonid__}] user/pass submit body: {response.text}')
-
-        ### TODO check for "Ausweisnummer unbekannt" or "Das angegebene Passwort ist falsch" for nice user info
-        ### TODO finally stop if page after user/pass submission still contains e.g. the LPASSW form field
-        ### TODO Error message is in <div class="hinweis fehler">...</div>
-
-        # CONSENT FORM
-        consentFormUrl = response.url
-        parsedUrl = urllib.parse.urlparse(consentFormUrl)
-        consentBaseUrl = f'{parsedUrl.scheme}://{parsedUrl.hostname}{parsedUrl.path}'
-        lm4utils.log(f'[{__addonid__}] consentBaseUrl: {consentBaseUrl}')
-
-        # Find form action in <form action="MATCH" ...>
-        match = re.search(r'<form[^>]*action="([^"]+)"', response.text)
-        if match is None:
-            lm4utils.log(f'[{__addonid__}] could not find consent form action in response body')
-            lm4utils.displayMsg(lm4utils.getTranslation(30506), lm4utils.getTranslation(30507))
-            return
-
-        action_value = match.group(1)
-        consentUrl = urllib.parse.urljoin(consentBaseUrl, action_value)
-
-        formdata = 'CLOGIN=Zustimmen+und+fortfahren'
-        headers = {
-            **commonHeaders,
-            "Content-Type": 'application/x-www-form-urlencoded',
-            'Origin': baseUrl,
-            'Referer': loginSubmitUrl,
-        }
-        lm4utils.log(f'[{__addonid__}] consent POST: {consentUrl}')
-        response = session.post(consentUrl, headers=headers, data=formdata)
-        lm4utils.log(f'[{__addonid__}] consent status: {response.status_code}')
-        lm4utils.log(f'[{__addonid__}] consent headers: {response.headers}')
-        lm4utils.log(f'[{__addonid__}] consent body: {response.text}')
-
-        # GET BEARER TOKENS
-        parsedUrl = urllib.parse.urlparse(response.url)
-        completedUrl = f'{parsedUrl.scheme}://{parsedUrl.hostname}{parsedUrl.path}'
-        completedUrlEncoded = urllib.parse.quote(completedUrl)
-
-        # Extract 'code' from completion url query params
-        code = urllib.parse.parse_qs(parsedUrl.query).get('code', [None])[0]
-        if code is None:
-            lm4utils.log(f'[{__addonid__}] no auth code found in final redirect: {response.url}')
-            lm4utils.displayMsg(lm4utils.getTranslation(30506), lm4utils.getTranslation(30507))
-            return
-
-        tokenUrl = f'{apiBase}/connect/token'
-        formdata = f'client_id={client}&grant_type=authorization_code&code={code}&redirect_uri={completedUrlEncoded}'
-        headers = {
-            **commonHeaders,
-            "Content-Type": 'application/x-www-form-urlencoded',
-            'Origin': baseUrl,
-            'Referer': loginFormUrl,
-        }
-        lm4utils.log(f'[{__addonid__}] token POST: {tokenUrl}')
-        response = requests.post(tokenUrl, headers=headers, data=formdata)
-        lm4utils.log(f'[{__addonid__}] token status: {response.status_code}')
-        lm4utils.log(f'[{__addonid__}] token headers: {response.headers}')
-        # not logging the response.text here as this would leak the access token
-        j = response.json()
-
-    # common handling of the token response
-    if 'error' in j:
-        if j['error'] == 'InvalidCredentials':
-            lm4utils.displayMsg(lm4utils.getTranslation(30506), lm4utils.getTranslation(30508))
-        elif j['error'] == 'Locked':
-            lm4utils.displayMsg(lm4utils.getTranslation(30506), lm4utils.getTranslation(30518))
+        # check for SWITCH edu-ID libraries
+        # those are redirected to login.eduid.ch, other "external" libraries to their own domain and '/oidcp/authorize'
+        if 'eduid.ch' in response.url or 'execution=e1s' in response.url:
+            # ---- SWITCH edu-ID / SLSKey (PURA) Shibboleth flow ----
+            j = signInEduId(session, response, domain, username, password)
+            if j is None:
+                return
         else:
-            lm4utils.displayMsg(lm4utils.getTranslation(30506), lm4utils.getTranslation(30507))
-        return
+            # LOGIN FORM
+            parsedUrl = urllib.parse.urlparse(loginFormUrl)
+            baseUrl = f'{parsedUrl.scheme}://{parsedUrl.hostname}'
+            loginBaseUrl = f'{baseUrl}{parsedUrl.path}'
+            lm4utils.log(f'[{__addonid__}] loginBaseUrl: {loginBaseUrl}')
+
+            # Find form action in <form action="MATCH" ...>
+            match = re.search(r'<form[^>]*action="([^"]+)"', response.text)
+            if match is None:
+                lm4utils.log(f'[{__addonid__}] could not find login form action in response body')
+                lm4utils.displayMsg(lm4utils.getTranslation(30506), lm4utils.getTranslation(30507))
+                return
+
+            action_value = match.group(1)
+            loginSubmitUrl = urllib.parse.urljoin(loginBaseUrl, action_value)
+
+            formdata = f'L%23AUSW={usernameEncoded}&LPASSW={passwordEncoded}&LLOGIN=Anmelden'
+            headers = {
+                **commonHeaders,
+                "Content-Type": 'application/x-www-form-urlencoded',
+                'Origin': baseUrl,
+                'Referer': loginFormUrl,
+            }
+            lm4utils.log(f'[{__addonid__}] user/pass submit POST: {loginSubmitUrl}')
+            response = session.post(loginSubmitUrl, headers=headers, data=formdata)
+            lm4utils.log(f'[{__addonid__}] user/pass submit status: {response.status_code}')
+            lm4utils.log(f'[{__addonid__}] user/pass submit headers: {response.headers}')
+            lm4utils.log(f'[{__addonid__}] user/pass submit body: {response.text}')
+
+            ### TODO check for "Ausweisnummer unbekannt" or "Das angegebene Passwort ist falsch" for nice user info
+            ### TODO finally stop if page after user/pass submission still contains e.g. the LPASSW form field
+            ### TODO Error message is in <div class="hinweis fehler">...</div>
+
+            # CONSENT FORM
+            consentFormUrl = response.url
+            parsedUrl = urllib.parse.urlparse(consentFormUrl)
+            consentBaseUrl = f'{parsedUrl.scheme}://{parsedUrl.hostname}{parsedUrl.path}'
+            lm4utils.log(f'[{__addonid__}] consentBaseUrl: {consentBaseUrl}')
+
+            # Find form action in <form action="MATCH" ...>
+            match = re.search(r'<form[^>]*action="([^"]+)"', response.text)
+            if match is None:
+                lm4utils.log(f'[{__addonid__}] could not find consent form action in response body')
+                lm4utils.displayMsg(lm4utils.getTranslation(30506), lm4utils.getTranslation(30507))
+                return
+
+            action_value = match.group(1)
+            consentUrl = urllib.parse.urljoin(consentBaseUrl, action_value)
+
+            formdata = 'CLOGIN=Zustimmen+und+fortfahren'
+            headers = {
+                **commonHeaders,
+                "Content-Type": 'application/x-www-form-urlencoded',
+                'Origin': baseUrl,
+                'Referer': loginSubmitUrl,
+            }
+            lm4utils.log(f'[{__addonid__}] consent POST: {consentUrl}')
+            response = session.post(consentUrl, headers=headers, data=formdata)
+            lm4utils.log(f'[{__addonid__}] consent status: {response.status_code}')
+            lm4utils.log(f'[{__addonid__}] consent headers: {response.headers}')
+            lm4utils.log(f'[{__addonid__}] consent body: {response.text}')
+
+            # GET BEARER TOKENS
+            parsedUrl = urllib.parse.urlparse(response.url)
+            completedUrl = f'{parsedUrl.scheme}://{parsedUrl.hostname}{parsedUrl.path}'
+            completedUrlEncoded = urllib.parse.quote(completedUrl)
+
+            # Extract 'code' from completion url query params
+            code = urllib.parse.parse_qs(parsedUrl.query).get('code', [None])[0]
+            if code is None:
+                lm4utils.log(f'[{__addonid__}] no auth code found in final redirect: {response.url}')
+                lm4utils.displayMsg(lm4utils.getTranslation(30506), lm4utils.getTranslation(30507))
+                return
+
+            tokenUrl = f'{apiBase}/connect/token'
+            formdata = f'client_id={client}&grant_type=authorization_code&code={code}&redirect_uri={completedUrlEncoded}'
+            headers = {
+                **commonHeaders,
+                "Content-Type": 'application/x-www-form-urlencoded',
+                'Origin': baseUrl,
+                'Referer': loginFormUrl,
+            }
+            lm4utils.log(f'[{__addonid__}] token POST: {tokenUrl}')
+            response = requests.post(tokenUrl, headers=headers, data=formdata)
+            lm4utils.log(f'[{__addonid__}] token status: {response.status_code}')
+            lm4utils.log(f'[{__addonid__}] token headers: {response.headers}')
+            # not logging the response.text here as this would leak the access token
+            j = response.json()
+
+        # common handling of the token response
+        if 'error' in j:
+            if j['error'] == 'InvalidCredentials':
+                lm4utils.displayMsg(lm4utils.getTranslation(30506), lm4utils.getTranslation(30508))
+            elif j['error'] == 'Locked':
+                lm4utils.displayMsg(lm4utils.getTranslation(30506), lm4utils.getTranslation(30518))
+            else:
+                lm4utils.displayMsg(lm4utils.getTranslation(30506), lm4utils.getTranslation(30507))
+            return
 
     lm4utils.setSetting('country', country["code"])
     lm4utils.setSetting('domain', domain)
