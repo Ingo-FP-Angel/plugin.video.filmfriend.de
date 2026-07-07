@@ -1,3 +1,6 @@
+v1.3.0
+- [feat] Add support for SWITCH edu-ID based login (by CorentinWicht)
+
 v1.2.1
 - [fix] Fix login for Munich (and likely other libraries with "external" login).
 
