@@ -187,6 +187,18 @@ msgctxt "#30518"
 msgid "Your IP is not from an allowed network."
 msgstr "Ihre IP stammt nicht aus einem zulässigen Netzwerk. Wenn Ihre Bibliothek weitere Anmeldeverfahren anbietet, werden diese leider noch nicht unterstützt."
 
+msgctxt "#30520"
+msgid "6-digit authenticator code"
+msgstr "SWITCH edu-ID: 6-stelliger Authenticator-Code"
+
+msgctxt "#30521"
+msgid "authenticator code is empty"
+msgstr "Authenticator-Code ist leer"
+
+msgctxt "#30522"
+msgid "The 6-digit authenticator code field mustn't be empty"
+msgstr "Bitte den 6-stelligen Authenticator-Code eingeben."
+
 msgctxt "#30600"
 msgid "Shows"
 msgstr "Serien"
