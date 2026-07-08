@@ -37,6 +37,7 @@ countries = [
     { "code": "at", "displayName": lm4utils.getTranslation(30032), "libraryListId": "8bd3757f-bb3f-4ffe-9543-3424497ef47d" },
     { "code": "de", "displayName": lm4utils.getTranslation(30033), "libraryListId": "fba2f8b5-6a3a-4da3-b555-21613a88d3ef" },
     { "code": "ch", "displayName": lm4utils.getTranslation(30034), "libraryListId": "b9b657d4-48c4-4827-a257-d1b0b44a278a" },
+    { "code": "fr", "displayName": lm4utils.getTranslation(30035), "libraryListId": "8737e70b-fc96-4512-900d-5983294a41dc" },
 ]
 
 def pick():
