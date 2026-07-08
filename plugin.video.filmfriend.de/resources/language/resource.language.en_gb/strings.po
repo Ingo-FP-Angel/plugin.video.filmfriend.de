@@ -67,6 +67,10 @@ msgctxt "#30034"
 msgid "Switzerland"
 msgstr "Switzerland"
 
+msgctxt "#30035"
+msgid "France"
+msgstr "France"
+
 msgctxt "#30050"
 msgid "Domain"
 msgstr "Domain"
