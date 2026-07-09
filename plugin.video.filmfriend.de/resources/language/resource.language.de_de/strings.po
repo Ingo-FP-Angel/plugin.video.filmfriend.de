@@ -75,6 +75,18 @@ msgctxt "#30035"
 msgid "France"
 msgstr "Frankreich"
 
+msgctxt "#30036"
+msgid "Liechtenstein"
+msgstr "Liechtenstein"
+
+msgctxt "#30037"
+msgid "Belgium"
+msgstr "Belgien"
+
+msgctxt "#30038"
+msgid "Luxembourg"
+msgstr "Luxemburg"
+
 msgctxt "#30050"
 msgid "Domain"
 msgstr "Domain"
