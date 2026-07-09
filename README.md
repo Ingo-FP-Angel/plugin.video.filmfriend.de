@@ -2,9 +2,13 @@
 
 ## General information
 
-A plugin for KODI to play shows and movies from https://filmfriend.de
+A plugin for KODI to play shows and movies from the filmfriend streaming portal for public libraries in several European countries.
 
 You need an account with a public library in order to access this service.
+
+Supported countries are Germany, Austria, Switzerland, Liechtenstein, Belgium, Luxembourg, and France.
+
+Available languages for the user interface are German and English.
 
 ## Install the addon
 
