@@ -1,3 +1,6 @@
+v1.2.3
+- [feat] Add support for libraries in Belgium, Liechtenstein and Luxembourg.
+
 v1.2.2
 - [feat] Add support for French libraries.
 

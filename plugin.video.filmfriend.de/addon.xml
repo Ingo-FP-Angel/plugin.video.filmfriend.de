@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<addon id="plugin.video.filmfriend.de" name="Filmfriend.de (Kodinerds)" version="1.2.2" provider-name="Ingo-FP-Angel, sarbes">
+<addon id="plugin.video.filmfriend.de" name="Filmfriend AT/BE/CH/DE/FR/LI/LU (Kodinerds)" version="1.2.3" provider-name="Ingo-FP-Angel, sarbes">
     <requires>
 		<import addon="xbmc.python" version="3.0.0"/>
 		<import addon="script.module.requests" version="2.19.1"/>
@@ -15,6 +15,9 @@
         <forum>https://www.kodinerds.net/thread/77768-filmfriend-de-kodinerds-id-plugin-video-filmfriend-de/</forum>
         <source>https://github.com/Ingo-FP-Angel/plugin.video.filmfriend.de</source>
         <news><![CDATA[
+v1.2.3 (2026-07-09)
+- Add support for libraries in Belgium, Liechtenstein and Luxembourg.
+
 v1.2.2 (2026-07-08)
 - Add support for French libraries.
 
@@ -60,11 +63,21 @@ v1.0.9 (2024-02-05)
 ]]>
         </news>
         <website>https://www.filmfriend.de/</website>
-        <summary lang="en_GB">This video add-on provides access to shows and movies of Filmfriend.de.</summary>
-        <description lang="en_GB">This video add-on provides access to shows and movies of Filmfriend.de. A valid library account is required in order to use this add-on.</description>
+        <summary lang="en_GB">This video add-on provides access to shows and movies of Filmfriend.</summary>
+        <description lang="en_GB">
+            This video add-on provides access to shows and movies of Filmfriend.
+            A valid library account is required in order to use this add-on.
+            Supports libraries in Germany, Austria, Switzerland, Liechtenstein, Belgium, Luxembourg, and France.
+            UI languages: German and English.
+        </description>
         <disclaimer lang="en_GB">This add-on is a fork of the not actively maintained "plugin.video.filmfriend" by sarbes.</disclaimer>
-        <summary lang="de_DE">Dieses Add-on bietet Zugriff auf Filme und Serien von Filmfriend.de.</summary>
-        <description lang="de_DE">Dieses Add-on bietet Zugriff auf Filme und Serien von Filmfriend.de. Ein Bibliotheksaccount ist zur Nutzung dieses Dienstes nötig.</description>
+        <summary lang="de_DE">Dieses Add-on bietet Zugriff auf Filme und Serien von Filmfriend.</summary>
+        <description lang="de_DE">
+            Dieses Add-on bietet Zugriff auf Filme und Serien von Filmfriend.
+            Ein Bibliotheksaccount ist zur Nutzung dieses Dienstes nötig.
+            Unterstützt Bibliotheken in Deutschland, Österreich, der Schweiz, Liechtenstein, Belgien, Luxemburg und Frankreich.
+            Sprachen für die Benutzeroberfläche: Deutsch und Englisch.
+        </description>
         <disclaimer lang="de_DE">Dieses Add-on ist ein Fork des nicht mehr aktiv weiterentwickelten "plugin.video.filmfriend" von sarbes.</disclaimer>
         <assets>
             <icon>resources/icon.png</icon>
