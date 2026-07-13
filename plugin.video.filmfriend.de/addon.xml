@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<addon id="plugin.video.filmfriend.de" name="Filmfriend AT/BE/CH/DE/FR/LI/LU (Kodinerds)" version="1.2.3" provider-name="Ingo-FP-Angel, sarbes">
+<addon id="plugin.video.filmfriend.de" name="Filmfriend AT/BE/CH/DE/FR/LI/LU (Kodinerds)" version="1.3.0" provider-name="Ingo-FP-Angel, sarbes">
     <requires>
 		<import addon="xbmc.python" version="3.0.0"/>
 		<import addon="script.module.requests" version="2.19.1"/>
@@ -15,6 +15,9 @@
         <forum>https://www.kodinerds.net/thread/77768-filmfriend-de-kodinerds-id-plugin-video-filmfriend-de/</forum>
         <source>https://github.com/Ingo-FP-Angel/plugin.video.filmfriend.de</source>
         <news><![CDATA[
+v1.3.0 (2026-07-13)
+- Add support for SWITCH edu-ID based login (by CorentinWicht)
+
 v1.2.3 (2026-07-09)
 - Add support for libraries in Belgium, Liechtenstein and Luxembourg.
 
