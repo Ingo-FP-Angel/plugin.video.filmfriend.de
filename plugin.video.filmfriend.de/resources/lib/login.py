@@ -158,7 +158,12 @@ def pick():
         }
         formdata = f'client_id={client}&username={usernameEncoded}&password={passwordEncoded}&scope=offline_access&grant_type=password&provider={provider}'
 
-        j = requests.post(f'{apiBase}/connect/token', headers=headers, data=formdata).json()
+        response = requests.post(f'{apiBase}/connect/token', headers=headers, data=formdata)
+        lm4utils.log(f'[{__addonid__}] authorize-delegated status: {response.status_code}')
+        lm4utils.log(f'[{__addonid__}] authorize-delegated headers: {response.headers}')
+        lm4utils.log(f'[{__addonid__}] authorize-delegated body: {response.text}')
+
+        j = response.json()
     else:
         session = requests.session()
 
@@ -270,15 +275,15 @@ def pick():
             # not logging the response.text here as this would leak the access token
             j = response.json()
 
-        # common handling of the token response
-        if 'error' in j:
-            if j['error'] == 'InvalidCredentials':
-                lm4utils.displayMsg(lm4utils.getTranslation(30506), lm4utils.getTranslation(30508))
-            elif j['error'] == 'Locked':
-                lm4utils.displayMsg(lm4utils.getTranslation(30506), lm4utils.getTranslation(30518))
-            else:
-                lm4utils.displayMsg(lm4utils.getTranslation(30506), lm4utils.getTranslation(30507))
-            return
+    # common handling of the token response
+    if 'error' in j:
+        if j['error'] == 'InvalidCredentials':
+            lm4utils.displayMsg(lm4utils.getTranslation(30506), lm4utils.getTranslation(30508))
+        elif j['error'] == 'Locked':
+            lm4utils.displayMsg(lm4utils.getTranslation(30506), lm4utils.getTranslation(30518))
+        else:
+            lm4utils.displayMsg(lm4utils.getTranslation(30506), 'error_description' in j and j['error_description'] or lm4utils.getTranslation(30507))
+        return
 
     lm4utils.setSetting('country', country["code"])
     lm4utils.setSetting('domain', domain)
