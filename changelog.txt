@@ -1,5 +1,8 @@
+v1.3.1
+- [chore] Better debug logging for 'delegated' login.
+
 v1.3.0
-- [feat] Add support for SWITCH edu-ID based login (by CorentinWicht)
+- [feat] Add support for SWITCH edu-ID based login (by CorentinWicht).
 
 v1.2.3
 - [feat] Add support for libraries in Belgium, Liechtenstein and Luxembourg.
