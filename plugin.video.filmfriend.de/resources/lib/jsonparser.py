@@ -147,9 +147,11 @@ def parseResponse(responseJson, content='videos'):
 			d['metadata']['season'] = result['seasonNumber']
 			d['metadata']['mpaa'] = result['motionPictureContentRating']
 			d['metadata']['art'] = _getArt(result)
-			if 'genres' in result['series']:
+			try:
 				for genre in result['series']['genres']:
 					d['metadata']['genres'].append(_getString(genre,'name'))
+			except:
+				pass
 			if 'releaseDate' in result:
 				d['metadata']['year'] = result['releaseDate'][:4]
 				d['metadata']['premiered'] = result['releaseDate'][:10]
@@ -167,8 +169,10 @@ def parseResponse(responseJson, content='videos'):
 			d['metadata']['plot'] = _getString(result,'synopsis')
 			d['metadata']['plotoutline'] = _getString(result,'teaser')
 
-			if 'season' in result:
+			try:
 				d['metadata']['season'] = result['season']['seasonNumber']
+			except:
+				pass
 			if 'episodeNumber' in result:
 				d['metadata']['episode'] = result['episodeNumber']
 				d['type'] = 'episode'
